@@ -1,0 +1,105 @@
+.topbar {
+  height: 64px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--bordure);
+  background: var(--fond);
+  position: relative;
+  z-index: 20;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brand-icon {
+  width: 28px;
+  height: 32px;
+}
+
+.brand-text {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--texte);
+}
+
+.brand-accent {
+  color: var(--indigo);
+}
+
+.topbar-right {
+  position: relative;
+}
+
+.shield-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--bordure);
+  background: var(--surface);
+  color: var(--texte-secondaire);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.shield-btn:hover {
+  border-color: var(--indigo);
+  color: var(--indigo);
+}
+
+.shield-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.privacy-popover {
+  position: absolute;
+  right: 0;
+  top: 46px;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  font-size: 0.85rem;
+  color: var(--texte-secondaire);
+}
+
+.privacy-popover strong {
+  display: block;
+  color: var(--texte);
+  margin-bottom: 6px;
+}
+
+.privacy-popover p {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+
+.close-popover {
+  border: 1px solid var(--bordure);
+  background: var(--surface-alt);
+  color: var(--indigo);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.app-main {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+}

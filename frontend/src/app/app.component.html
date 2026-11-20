@@ -1,0 +1,54 @@
+<header class="topbar">
+  <a routerLink="/" class="brand">
+    <svg class="brand-icon" viewBox="0 0 36 40" fill="none" aria-hidden="true">
+      <path
+        d="M18 2C18 2 5 16.4 5 25.5C5 32.4036 10.8203 38 18 38C25.1797 38 31 32.4036 31 25.5C31 16.4 18 2 18 2Z"
+        fill="url(#labmindDrop)"
+      />
+      <path d="M18 19V29M13 24H23" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" />
+      <defs>
+        <linearGradient id="labmindDrop" x1="6" y1="4" x2="30" y2="38" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#5b42f3" />
+          <stop offset="1" stop-color="#4328b8" />
+        </linearGradient>
+      </defs>
+    </svg>
+    <span class="brand-text">Lab<span class="brand-accent">Mind</span></span>
+  </a>
+
+  <div class="topbar-right">
+    <button
+      type="button"
+      class="shield-btn"
+      (click)="togglePrivacyInfo()"
+      title="Confidentialité et protection des données"
+      aria-label="Confidentialité"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 3l7 3v5c0 5-3.5 8.8-7 10-3.5-1.2-7-5-7-10V6l7-3z"
+        />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.2l1.7 1.7 3.5-3.6" />
+      </svg>
+    </button>
+
+    @if (showPrivacyInfo) {
+      <div class="privacy-popover" role="status">
+        <strong>Données éphémères</strong>
+        <p>
+          Aucun compte requis. Votre document est analysé localement, supprimé dès la fin du
+          traitement, et vos résultats sont automatiquement effacés après 1 heure.
+        </p>
+        <button type="button" class="close-popover" (click)="showPrivacyInfo = false">
+          Fermer
+        </button>
+      </div>
+    }
+  </div>
+</header>
+
+<main class="app-main">
+  <router-outlet />
+</main>

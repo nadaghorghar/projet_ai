@@ -1,0 +1,25 @@
+{
+  "task_id": "3f2b8c1e-6a52-4d7e-9a0c-1b2d3e4f5a6b",
+  "status": "waiting_for_user",
+  "document": {"filename": "bilan.pdf", "extraction_method": "pdf_text"},
+  "detected_categories": [],
+  "parameters": [
+    {
+      "code": "HCT", "name_printed": "Hématocrite", "value": 46.0, "unit": null,
+      "reference": {"min": 37.0, "max": 47.0, "origin": "document_laboratoire"},
+      "status": "not_analyzed", "reason": "unité absente du document",
+      "confidence": null,
+      "evidence": {"raw_text": "Hématocrite 46,0 37 - 47", "page": null}
+    }
+  ],
+  "pending_question": {
+    "question_id": "q-001", "field": "unit", "code": "HCT",
+    "message": "L'unité de ce paramètre est absente du document. Quelle unité figure sur votre compte rendu ?",
+    "options": ["%", "autre", "je ne sais pas"]
+  },
+  "report_id": null,
+  "explanations": null,
+  "sources": [],
+  "disclaimer": "Outil pédagogique : ce bilan ne remplace pas une consultation médicale et ne constitue ni un diagnostic ni une prescription.",
+  "errors": []
+}

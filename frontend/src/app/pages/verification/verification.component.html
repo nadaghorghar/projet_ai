@@ -1,0 +1,54 @@
+<div class="thread-container">
+  <div class="file-bubble">
+    <div class="file-icon-box">DOC</div>
+    <div class="file-meta">
+      <div class="file-name">{{ filename }}</div>
+      <div class="file-sub">Vérification rapide</div>
+    </div>
+  </div>
+
+  @if (question) {
+    <div class="assistant-card">
+      <h2>Une petite précision est nécessaire</h2>
+      <p class="question-text">{{ question.message }}</p>
+
+      <div class="pill-options">
+        @for (opt of options; track opt) {
+          <button
+            type="button"
+            class="option-pill"
+            [class.active]="selectedOption === opt"
+            [class.neutral]="opt === 'je ne sais pas'"
+            [disabled]="isSubmitting"
+            (click)="chooseAndSend(opt)"
+          >
+            {{ opt }}
+          </button>
+        }
+      </div>
+
+      @if (selectedOption === 'autre' || options.length <= 1) {
+        <div class="custom-row">
+          <input
+            type="text"
+            [(ngModel)]="customValue"
+            placeholder="Saisissez la valeur ou l'unité figurant sur votre bilan..."
+            (keyup.enter)="submitCustom()"
+          />
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="isSubmitting"
+            (click)="submitCustom()"
+          >
+            {{ isSubmitting ? 'Envoi...' : 'Valider' }}
+          </button>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="error-box" style="margin-top: 14px">{{ errorMessage }}</div>
+      }
+    </div>
+  }
+</div>

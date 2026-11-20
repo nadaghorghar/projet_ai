@@ -1,0 +1,25 @@
+.wait-card {
+  text-align: center;
+  padding: 36px 24px;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 18px;
+  border: 3.5px solid var(--indigo-soft);
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.wait-desc {
+  max-width: 460px;
+  margin: 8px auto 18px;
+  color: var(--texte-secondaire);
+  font-size: 0.93rem;
+}

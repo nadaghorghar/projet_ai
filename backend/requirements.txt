@@ -1,0 +1,16 @@
+pdfplumber>=0.11
+pymupdf>=1.24
+pytesseract>=0.3.10
+opencv-python-headless>=4.9
+numpy>=1.26
+Pillow>=10.0
+reportlab>=4.0
+pytest>=8.0
+pydantic>=2.6
+faiss-cpu>=1.8
+sentence-transformers>=3.0
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+httpx>=0.27
+sqlalchemy>=2.0

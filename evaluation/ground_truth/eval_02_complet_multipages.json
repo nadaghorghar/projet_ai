@@ -1,0 +1,56 @@
+{
+  "doc_id": "eval_02_complet_multipages",
+  "filename": "eval_02_complet_multipages.pdf",
+  "source_type": "synthetic_varied",
+  "parameters": [
+    {
+      "code": "GLY",
+      "value": 1.02,
+      "unit": "g/L",
+      "reference_min": 0.7,
+      "reference_max": 1.1
+    },
+    {
+      "code": "HBA1C",
+      "value": 5.9,
+      "unit": "%",
+      "reference_min": null,
+      "reference_max": 6.5
+    },
+    {
+      "code": "LDL",
+      "value": 1.72,
+      "unit": "g/L",
+      "reference_min": null,
+      "reference_max": 1.6
+    },
+    {
+      "code": "ALAT",
+      "value": 48.0,
+      "unit": "U/L",
+      "reference_min": null,
+      "reference_max": 40.0
+    },
+    {
+      "code": "GGT",
+      "value": 32.0,
+      "unit": "UI/L",
+      "reference_min": 10.0,
+      "reference_max": 55.0
+    },
+    {
+      "code": "CREAT",
+      "value": 9.8,
+      "unit": "mg/L",
+      "reference_min": 7.0,
+      "reference_max": 13.0
+    },
+    {
+      "code": "DFG",
+      "value": 84.0,
+      "unit": "mL/min/1.73m²",
+      "reference_min": 60.0,
+      "reference_max": null
+    }
+  ]
+}

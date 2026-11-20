@@ -1,0 +1,35 @@
+{
+  "doc_id": "eval_01_nfs_martial",
+  "filename": "eval_01_nfs_martial.pdf",
+  "source_type": "synthetic_varied",
+  "parameters": [
+    {
+      "code": "HGB",
+      "value": 11.2,
+      "unit": "g/dL",
+      "reference_min": 12.0,
+      "reference_max": 16.0
+    },
+    {
+      "code": "PLT",
+      "value": 235.0,
+      "unit": "10^3/µL",
+      "reference_min": 150.0,
+      "reference_max": 400.0
+    },
+    {
+      "code": "FERR",
+      "value": 22.0,
+      "unit": "ng/mL",
+      "reference_min": 30.0,
+      "reference_max": 300.0
+    },
+    {
+      "code": "FER",
+      "value": 10.4,
+      "unit": "µmol/L",
+      "reference_min": 11.0,
+      "reference_max": 28.0
+    }
+  ]
+}

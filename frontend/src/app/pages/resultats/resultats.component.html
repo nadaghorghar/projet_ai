@@ -1,0 +1,279 @@
+<div class="thread-container">
+  @if (deleted) {
+    <div class="assistant-card deleted-card">
+      <h2>Données supprimées</h2>
+      <p>Votre document et vos résultats ont bien été effacés de ce serveur.</p>
+      <a class="btn btn-primary" routerLink="/">← Nouvelle analyse</a>
+    </div>
+  } @else if (task) {
+    <!-- En-tête document -->
+    <div class="file-bubble">
+      <div class="file-icon-box" [class.is-image]="isImageDoc">
+        {{ isImageDoc ? 'IMG' : 'PDF' }}
+      </div>
+      <div class="file-meta">
+        <div class="file-name">{{ task.document?.filename || 'Votre bilan biologique' }}</div>
+        <div class="file-sub">
+          {{ task.parameters?.length || 0 }} paramètre(s) extrait(s) · Analyse pédagogique LabMind
+        </div>
+      </div>
+      <div class="header-actions no-print">
+        <a class="btn btn-primary" [href]="pdfUrl" target="_blank" rel="noopener">
+          Télécharger PDF
+        </a>
+      </div>
+    </div>
+
+    <!-- 1. Analyse détaillée des résultats -->
+    <section class="report-section">
+      @if (nfsCoreParams.length) {
+        <div class="section-header-row">
+          <h2>A. Numération formule sanguine (Hémogramme)</h2>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-wrap">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Paramètre</th>
+                  <th>Ton résultat</th>
+                  <th>Valeurs normales</th>
+                  <th class="col-right">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of nfsCoreParams; track p.code) {
+                  <tr>
+                    <td class="cell-name">{{ p.name_printed }}</td>
+                    <td class="cell-value mono-num">{{ formatResult(p) }}</td>
+                    <td class="cell-norm mono-num">{{ formatNorm(p.reference) }}</td>
+                    <td class="col-right">
+                      <span [class]="statusClass(p.status)">{{ statusLabel(p.status) }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        @if (sectionSummaries.length) {
+          <div class="meaning-box">
+            <h3>Qu'est-ce que cela signifie ?</h3>
+            <ul>
+              @for (item of sectionSummaries; track item.title) {
+                <li>
+                  <strong>{{ item.title }} :</strong> {{ item.text }}
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      }
+
+      @if (leukocyteParams.length) {
+        <div class="section-header-row section-spaced">
+          <h2>B. Formule leucocytaire : les défenses immunitaires</h2>
+          @if (allLeukocytesWithinRef) {
+            <span class="all-ok-note">• Tous les résultats sont dans les normes</span>
+          }
+        </div>
+
+        <div class="panel-card">
+          <div class="table-wrap">
+            <table class="simple-table">
+              <thead>
+                <tr>
+                  <th>Cellules</th>
+                  <th>Ton résultat</th>
+                  <th>Valeurs normales</th>
+                  <th class="col-right">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of leukocyteParams; track p.code) {
+                  <tr>
+                    <td class="cell-name">{{ p.name_printed }}</td>
+                    <td class="cell-value mono-num">{{ formatResult(p) }}</td>
+                    <td class="cell-norm mono-num">{{ formatNorm(p.reference, p.unit) }}</td>
+                    <td class="col-right">
+                      <span [class]="statusClass(p.status)">{{ statusLabel(p.status) }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (biochemParams.length) {
+        <div class="section-header-row section-spaced">
+          <div>
+            <h2>C. Biochimie sanguine</h2>
+            @if (hasBiochemAttention) {
+              <p class="section-sub">C'est la partie qui mérite le plus ton attention.</p>
+            }
+          </div>
+        </div>
+
+        <div class="biochem-grid">
+          @for (p of biochemParams; track p.code; let i = $index) {
+            <article
+              class="biochem-card"
+              [class.biochem-card-alert]="p.status === 'below_reference' || p.status === 'above_reference'"
+            >
+              <div class="biochem-card-top">
+                <span class="biochem-title">{{ i + 1 }}. {{ p.name_printed }}</span>
+                <span [class]="statusClass(p.status)">{{ statusLabel(p.status) }}</span>
+              </div>
+
+              <div
+                class="biochem-value mono-num"
+                [class.value-alert]="p.status === 'below_reference' || p.status === 'above_reference'"
+              >
+                {{ formatNumberFr(p.value) }}
+                <span class="biochem-unit">{{ p.unit || '' }}</span>
+              </div>
+
+              <div class="biochem-norm mono-num">{{ formatNormCard(p.reference, p.unit) }}</div>
+
+              @if (explanationFor(p.code)) {
+                <p class="biochem-desc">{{ explanationFor(p.code) }}</p>
+              }
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- 2. Que dois-tu manger ? -->
+    @if (nutritionPlan || (lifestyleInfo && lifestyleInfo.isGrounded)) {
+      <section class="report-section section-spaced-lg">
+        <h2>2. Que dois-tu manger ?</h2>
+
+        @if (nutritionPlan) {
+          @if (nutritionPlan.intro) {
+            <p class="narrative-p">{{ nutritionPlan.intro }}</p>
+          }
+
+          @if (nutritionPlan.highlights?.length) {
+            <h3 class="sub-heading">{{ nutritionPlan.section_title || 'A. Les aliments adaptés' }}</h3>
+            <div class="food-grid">
+              @for (item of nutritionPlan.highlights; track item.title) {
+                <article class="food-card">
+                  <div class="food-img-wrap">
+                    <img
+                      [src]="foodImagePath(item.image_key)"
+                      [alt]="item.title"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div class="food-card-body">
+                    <div class="food-title">{{ item.title }}</div>
+                    <div class="food-sub">{{ item.subtitle }}</div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+
+          @if (nutritionPlan.daily_meal_plan?.length) {
+            <h3 class="sub-heading">B. Exemple d'une journée alimentaire équilibrée</h3>
+            <div class="panel-card">
+              <div class="table-wrap">
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Repas</th>
+                      <th>Exemple</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of nutritionPlan.daily_meal_plan; track row.meal) {
+                      <tr>
+                        <td class="cell-name">{{ row.meal }}</td>
+                        <td class="cell-norm">{{ row.example }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        } @else if (lifestyleInfo) {
+          <div class="panel-card">
+            <p class="narrative-p" style="white-space: pre-line; margin: 0;">{{ lifestyleInfo.text }}</p>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- 3. Que dois-tu faire maintenant ? -->
+    @if (actionSteps.length || consultationQuestions.length) {
+      <section class="report-section section-spaced-lg">
+        <h2>3. Que dois-tu faire maintenant ?</h2>
+
+        @if (actionSteps.length) {
+          <ol class="action-list">
+            @for (step of actionSteps; track step) {
+              <li>{{ step }}</li>
+            }
+          </ol>
+        }
+
+        @if (consultationQuestions.length) {
+          <div class="meaning-box" style="margin-top: 18px;">
+            <h3>Questions à préparer pour ton médecin</h3>
+            <ul>
+              @for (q of consultationQuestions; track q) {
+                <li>{{ q }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Mention pédagogique obligatoire -->
+    <div class="disclaimer-callout" role="note">
+      {{ task.disclaimer }}
+    </div>
+
+    <!-- Sources documentaires officielles -->
+    @if (task.sources?.length) {
+      <div class="sources-row">
+        @for (s of task.sources; track s.source_id) {
+          <a [href]="s.url" target="_blank" rel="noopener" class="source-link">
+            <span>Source : {{ s.organisme }} — {{ s.title }}</span>
+          </a>
+        }
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="bottom-actions no-print">
+      <a class="btn btn-secondary" routerLink="/">← Nouvelle analyse</a>
+      <a class="btn btn-primary" [href]="pdfUrl" target="_blank" rel="noopener">
+        Télécharger le rapport PDF
+      </a>
+    </div>
+
+    <div class="delete-footer no-print">
+      <button
+        type="button"
+        class="btn btn-ghost-danger"
+        [disabled]="isDeleting"
+        (click)="deleteData()"
+      >
+        {{ isDeleting ? 'Suppression...' : 'Supprimer mes données maintenant' }}
+      </button>
+      <span class="auto-del-hint">· Suppression automatique après 1h</span>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-box" style="margin-top: 12px">{{ errorMessage }}</div>
+    }
+  }
+</div>

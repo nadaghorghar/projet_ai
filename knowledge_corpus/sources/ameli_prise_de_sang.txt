@@ -1,0 +1,61 @@
+Comment lire les résultats d’une prise de sang ?
+
+Les analyses sanguines sont prescrites afin d’affiner le diagnostic de certaines maladies. Voici quelques repères pour le bon déroulement de votre prise de sang, et pour mieux comprendre les résultats communiqués par le laboratoire.
+
+Qu’est-ce qu’une prise de sang ?
+Une prise de sang est un prélèvement sanguin réalisé dans une veine le plus souvent au niveau du bras, à l’aide d’une aiguille. Il permet d’analyser le sang, pour diagnostiquer certaines maladies.
+Cet examen est peu douloureux. Toutefois, la peau peut être légèrement sensible lorsque l’aiguille la traverse. Aussi, chez les enfants, on utilise parfois un patch anesthésiant, afin d’insensibiliser la zone de ponction. Il se pose sur le bras, une heure avant le prélèvement.
+
+Avant la prise de sang : conseils pour bien se préparer
+Lorsque vous prenez rendez-vous dans un laboratoire d’analyses sanguines, demandez à votre interlocuteur si vous devez être à jeun au moment du prélèvement.
+Si vous devez être à jeun, pensez à :
+- ne pas prendre de nourriture ou boisson sucrée (hormis l’eau) dans les 12 heures précédant la prise de sang ;
+- éviter de fumer et de pratiquer une activité physique intense, juste avant le rendez-vous.
+De nombreux médicaments peuvent affecter les résultats de certains dosages. Aussi, mentionnez tous les traitements que vous prenez (avec ou sans ordonnance) :
+- au médecin qui vous prescrit l’examen ;
+- au technicien ou à l’infirmier qui le réalise.
+Par ailleurs, s’il vous est impossible de vous déplacer pour raisons médicales, vous pouvez demander un prélèvement à domicile.
+
+Toujours dans le même laboratoire ?
+Pour une même analyse sanguine, les résultats peuvent varier légèrement d’un laboratoire à un autre. Ce phénomène est dû à l’emploi de techniques de dosage différentes. Aussi, afin de pouvoir comparer l’évolution des dosages, il est préférable de réaliser toutes vos prises de sang dans le même laboratoire.
+
+Déchiffrer les résultats de la prise de sang à l'aide des valeurs de référence
+Les valeurs de référence mentionnées sur le document de résultats de prise de sang sont des normes de résultats, variant selon les techniques de dosage utilisées, le sexe et l’âge. Généralement, elles figurent dans la partie droite du document.
+Lisez toujours les chiffres de vos dosages sanguins à la lumière de ces valeurs de référence. Si vos résultats n’entrent pas dans ces normes, faites-en part à votre médecin, qui vous fournira des explications.
+Un chiffre supérieur ou inférieur aux limites fixées n’est pas systématiquement révélateur d’une maladie.
+
+Déchiffrer les résultats de la prise de sang : la numération formule sanguine (NFS) ou hémogramme
+L'hémogramme ou numération formule sanguine consiste à dénombrer et analyser les différentes cellules du sang : globules rouges ou hématies, plaquettes, globules blancs ou leucocytes.
+
+Comprendre le dosage de la ferritine
+La ferritine est une protéine qui assure le stockage du fer dans le sang. Le fer est très utile pour la constitution de l'hémoglobine des hématies.
+Un taux de ferritine bas signifie que le fer stocké est insuffisant ; c'est le signe d'une carence en fer (anémie ferriprive).
+Un taux excessif de ferritine sanguine peut révéler : une hémochromatose, anomalie génétique qui se manifeste par une absorption et un stockage excessif de fer ; un alcoolisme chronique ; une maladie inflammatoire.
+
+Comprendre le bilan inflammatoire simple sanguin
+Le bilan inflammatoire sanguin a recours au dosage de la CRP. La protéine C-réactive (ou CRP) est fabriquée par le foie. Son taux dans le sang augmente vite en cas d’infection ou d’inflammation. Il diminue ensuite rapidement en cas d’amélioration. La CRP est au dessus des valeurs de référence en cas d'inflammation ou d'infection.
+
+Comprendre les résultats d’analyse de la glycémie
+La glycémie est l’évaluation de la concentration de glucose (principale source d’énergie de l’organisme) dans le sang.
+Elle peut révéler :
+- un taux de glucose trop faible par rapport à la valeur de référence (hypoglycémie) ;
+- un taux de glucose trop élevé (hyperglycémie, caractéristique du diabète). Le diagnostic de diabète est posé lorsque la glycémie à jeun est égale ou supérieure à 1,26 g/l (ou 7 mmol/l), taux constaté à 2 reprises.
+La glycémie est souvent mesurée à la fois à jeun et après les repas (mesure de la glycémie post-prandiale).
+
+Comprendre les résultats du bilan lipidique sanguin
+Le bilan lipidique sanguin, aussi appelé exploration d’une anomalie lipidique (EAL), vise à mesurer les quantités des deux principaux types de lipides (graisses) dans le sang.
+Le cholestérol est principalement fabriqué par le foie, et aussi apporté par l’alimentation. Son dosage concerne le taux de cholestérol total, le LDL-cholestérol (transporté dans le sang vers les cellules, pouvant se déposer sur la paroi des artères si son taux est trop élevé) et le HDL-cholestérol (qui collecte le cholestérol en excès pour l’amener jusqu’au foie qui assure son élimination).
+Les triglycérides sont apportés par l’alimentation et stockés dans les cellules adipeuses pour servir de réserve d’énergie.
+En l'absence de facteurs de risque cardiovasculaire, les taux suivants sont considérés comme normaux : cholestérol total inférieur à 2 g/l, LDL-cholestérol inférieur à 1,6 g/l, HDL-cholestérol supérieur à 0,4 g/l, triglycérides inférieur à 1,5 g/l.
+
+Comprendre les résultats du bilan rénal
+Servant à évaluer le fonctionnement des reins, le bilan rénal prend en compte plusieurs éléments.
+La créatinine sanguine provient de la dégradation de la créatine (présente surtout dans les muscles). Inutile à l’organisme, elle est éliminée par les reins et rejetée dans les urines. Un taux élevé de créatinine signale un dysfonctionnement rénal ; la quantité normale dépend de la masse musculaire.
+Le débit de filtration glomérulaire (DFG) correspond à la capacité de filtration des reins en 24 heures, calculé à partir de la créatinine sanguine (le plus souvent par l'équation CKD-EPI).
+L’urée est un déchet issu de la transformation des protéines alimentaires, éliminé par les reins dans les urines. En complément, une analyse d'urine recherche une protéinurie ou une albuminurie. Une maladie rénale chronique est présente si, à deux examens successifs, le DFG est inférieur à 60 ml/min/1.73m2 et/ou la protéinurie/albuminurie dépassent les valeurs-seuils.
+
+Comprendre les résultats du bilan hépatique
+Le bilan hépatique contribue à identifier d’éventuelles maladies du foie.
+Les transaminases sont des enzymes hépatiques augmentées lorsque des cellules du foie se détruisent : l’alanine aminotransférase (ALAT ou TGP) et l’aspartate aminotransférase (ASAT ou TGO).
+Les enzymes de la cholestase (gamma-glutamyl transférase GGT et phosphatase alcaline PAL) témoignent d'une anomalie de la fabrication ou de l'excrétion de la bilirubine.
+La bilirubine est un pigment jaune produit par la dégradation de l’hémoglobine des globules rouges, normalement éliminé par le foie.

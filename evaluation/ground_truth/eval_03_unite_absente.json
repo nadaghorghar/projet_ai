@@ -1,0 +1,21 @@
+{
+  "doc_id": "eval_03_unite_absente",
+  "filename": "eval_03_unite_absente.pdf",
+  "source_type": "synthetic_varied",
+  "parameters": [
+    {
+      "code": "HCT",
+      "value": 43.0,
+      "unit": null,
+      "reference_min": 37.0,
+      "reference_max": 47.0
+    },
+    {
+      "code": "UREE",
+      "value": 0.34,
+      "unit": "g/L",
+      "reference_min": 0.15,
+      "reference_max": 0.45
+    }
+  ]
+}

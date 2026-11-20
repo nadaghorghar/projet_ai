@@ -1,0 +1,237 @@
+{
+  "version": "1.0",
+  "sources": [
+    {
+      "source_id": "ameli-prise-sang-2026",
+      "title": "Comment lire les résultats d'une prise de sang ?",
+      "organisme": "Assurance Maladie (ameli.fr)",
+      "url": "https://www.ameli.fr/assure/sante/examen/analyse/lire-resultats-prise-sang",
+      "published_date": "2026-01-08",
+      "categories": [
+        "nfs",
+        "bilan_martial",
+        "bilan_glycemique",
+        "bilan_lipidique",
+        "bilan_hepatique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "hemoglobine",
+        "ferritine",
+        "glycemie",
+        "cholesterol_total",
+        "hdl",
+        "ldl",
+        "triglycerides",
+        "creatinine",
+        "uree",
+        "dfg",
+        "alat",
+        "asat",
+        "ggt",
+        "bilirubine"
+      ],
+      "reuse_conditions": "Contenu informatif public Assurance Maladie (ameli.fr), cité avec lien source",
+      "local_filename": "ameli_prise_de_sang.txt",
+      "status": "collected",
+      "notes": "Fiche officielle ameli.fr complète (sections dépliées)."
+    },
+    {
+      "source_id": "ameli-hemogramme-biochimie-2026",
+      "title": "Comprendre les indices de l'hémogramme (NFS) et les paramètres biochimiques",
+      "organisme": "Assurance Maladie (ameli.fr)",
+      "url": "https://www.ameli.fr/assure/sante/examen/analyse/comprendre-resultats-analyse-sang",
+      "published_date": "2026-01-15",
+      "categories": [
+        "nfs",
+        "bilan_martial",
+        "bilan_glycemique",
+        "bilan_hepatique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "hematocrite",
+        "vgm",
+        "tcmh",
+        "ccmh",
+        "globules_blancs",
+        "plaquettes",
+        "neutrophiles",
+        "lymphocytes",
+        "monocytes",
+        "eosinophiles",
+        "basophiles",
+        "creatinine",
+        "calcium",
+        "magnesium",
+        "uree",
+        "dfg",
+        "acide_urique"
+      ],
+      "reuse_conditions": "Contenu informatif public Assurance Maladie (ameli.fr), cité avec lien source",
+      "local_filename": "ameli_hemogramme_biochimie.txt",
+      "status": "collected",
+      "notes": "Synthèse pédagogique complète couvrant les sous-indices NFS, la formule leucocytaire et les paramètres biochimiques courants."
+    },
+    {
+      "source_id": "anses-reperes-nutritionnels-2017",
+      "title": "L'Anses actualise les repères de consommations alimentaires pour la population française",
+      "organisme": "ANSES",
+      "url": "https://www.anses.fr/fr/actualite/lanses-actualise-reperes-consommations-alimentaires-population-francaise",
+      "published_date": "2017-01-23",
+      "categories": [
+        "hygiene_de_vie"
+      ],
+      "themes": [
+        "alimentation",
+        "activite_physique",
+        "sedentarite",
+        "reperes_nutritionnels"
+      ],
+      "reuse_conditions": "Contenu informatif public ANSES (anses.fr), cité avec lien source",
+      "local_filename": "anses_reperes_nutritionnels.txt",
+      "status": "collected",
+      "notes": "Actualité officielle ANSES sur la révision des repères alimentaires adultes (PNNS)."
+    },
+    {
+      "source_id": "anses-vitamines-mineraux-2021",
+      "title": "Les références nutritionnelles en vitamines et minéraux",
+      "organisme": "ANSES",
+      "url": "https://www.anses.fr/fr/content/les-r%C3%A9f%C3%A9rences-nutritionnelles-en-vitamines-et-min%C3%A9raux",
+      "published_date": "2021-04-23",
+      "categories": [
+        "hygiene_de_vie",
+        "bilan_martial"
+      ],
+      "themes": [
+        "magnesium",
+        "calcium",
+        "fer",
+        "vitamines_mineraux",
+        "references_nutritionnelles"
+      ],
+      "reuse_conditions": "Contenu informatif public ANSES (anses.fr), cité avec lien source",
+      "local_filename": "anses_vitamines_mineraux.txt",
+      "status": "collected",
+      "notes": "Synthèse officielle ANSES (mise en ligne avril 2021) sur magnésium, calcium et fer."
+    },
+    {
+      "source_id": "ameli-alimentation-adulte-2026",
+      "title": "L'équilibre alimentaire chez l'adulte",
+      "organisme": "Assurance Maladie (ameli.fr)",
+      "url": "https://www.ameli.fr/assure/sante/themes/alimentation/alimentation-adulte/alimentation-adulte-equilibre-repas",
+      "published_date": "2026-03-10",
+      "categories": [
+        "hygiene_de_vie"
+      ],
+      "themes": [
+        "alimentation",
+        "equilibre_alimentaire",
+        "fruits_legumes",
+        "hydratation"
+      ],
+      "reuse_conditions": "Contenu informatif public Assurance Maladie (ameli.fr), cité avec lien source",
+      "local_filename": "ameli_alimentation_adulte.txt",
+      "status": "collected",
+      "notes": "Repères pratiques PNNS / ameli.fr pour la population adulte."
+    },
+    {
+      "source_id": "plan-inserm-fer-anemie",
+      "title": "Dossier métabolisme du fer et anémie",
+      "organisme": "Inserm",
+      "url": "https://www.inserm.fr/",
+      "published_date": null,
+      "categories": [
+        "bilan_martial",
+        "nfs"
+      ],
+      "themes": [
+        "fer",
+        "ferritine",
+        "transferrine",
+        "hemoglobine"
+      ],
+      "reuse_conditions": "À vérifier sur la page dossier Inserm avant collecte",
+      "local_filename": null,
+      "status": "pending_collection",
+      "notes": "Rechercher le dossier Inserm correspondant et vérifier la date de mise à jour."
+    },
+    {
+      "source_id": "plan-ameli-glycemie",
+      "title": "Glycémie et HbA1c : comprendre son bilan glycémique",
+      "organisme": "Assurance Maladie (ameli.fr)",
+      "url": "https://www.ameli.fr/",
+      "published_date": null,
+      "categories": [
+        "bilan_glycemique"
+      ],
+      "themes": [
+        "glycemie",
+        "hba1c"
+      ],
+      "reuse_conditions": "À vérifier sur les mentions légales du document avant collecte",
+      "local_filename": null,
+      "status": "pending_collection",
+      "notes": "Collecter les fiches officielles sur la glycémie à jeun et le suivi par HbA1c."
+    },
+    {
+      "source_id": "plan-ameli-bilan-lipidique",
+      "title": "Comprendre son bilan lipidique (cholestérol, HDL, LDL, triglycérides)",
+      "organisme": "Assurance Maladie (ameli.fr)",
+      "url": "https://www.ameli.fr/",
+      "published_date": null,
+      "categories": [
+        "bilan_lipidique"
+      ],
+      "themes": [
+        "cholesterol_total",
+        "hdl",
+        "ldl",
+        "triglycerides"
+      ],
+      "reuse_conditions": "À vérifier sur les mentions légales du document avant collecte",
+      "local_filename": null,
+      "status": "pending_collection",
+      "notes": "Inclure également les repères pédagogiques de la HAS sur les dyslipidémies si librement réutilisables."
+    },
+    {
+      "source_id": "plan-has-bilan-renal",
+      "title": "Évaluation de la fonction rénale : créatinine et DFG estimé",
+      "organisme": "Haute Autorité de Santé (HAS)",
+      "url": "https://www.has-sante.fr/",
+      "published_date": null,
+      "categories": [
+        "bilan_renal"
+      ],
+      "themes": [
+        "creatinine",
+        "uree",
+        "dfg"
+      ],
+      "reuse_conditions": "À vérifier sur la fiche HAS avant collecte",
+      "local_filename": null,
+      "status": "pending_collection",
+      "notes": "Compléter si besoin avec une fiche pédagogique ameli.fr sur la créatininémie et l'urée."
+    },
+    {
+      "source_id": "plan-bilan-hepatique",
+      "title": "Bilan hépatique : ALAT, ASAT, GGT et bilirubine",
+      "organisme": "Assurance Maladie / HAS",
+      "url": "https://www.has-sante.fr/",
+      "published_date": null,
+      "categories": [
+        "bilan_hepatique"
+      ],
+      "themes": [
+        "alat",
+        "asat",
+        "ggt",
+        "bilirubine"
+      ],
+      "reuse_conditions": "À vérifier sur la source officielle sélectionnée avant collecte",
+      "local_filename": null,
+      "status": "pending_collection",
+      "notes": "Vérifier fiche HAS ou société savante d'hépatologie (AFEF) / ameli.fr."
+    }
+  ]
+}

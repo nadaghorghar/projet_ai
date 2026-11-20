@@ -1,0 +1,26 @@
+# Environnement Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Données sensibles et générées
+.env
+backend/data/
+backend/storage/
+*.sqlite3
+*.db
+
+# Documents médicaux : ne JAMAIS les versionner
+evaluation/documents/
+uploads/
+outputs/
+
+# Éditeur / système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+node_modules/
+frontend/.angular/
+frontend/dist/

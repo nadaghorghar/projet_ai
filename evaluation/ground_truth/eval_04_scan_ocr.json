@@ -1,0 +1,28 @@
+{
+  "doc_id": "eval_04_scan_ocr",
+  "filename": "eval_04_scan_ocr.png",
+  "source_type": "synthetic_varied",
+  "parameters": [
+    {
+      "code": "GLY",
+      "value": 0.88,
+      "unit": "g/L",
+      "reference_min": 0.7,
+      "reference_max": 1.1
+    },
+    {
+      "code": "CHOL",
+      "value": 1.85,
+      "unit": "g/L",
+      "reference_min": null,
+      "reference_max": 2.0
+    },
+    {
+      "code": "TG",
+      "value": 1.2,
+      "unit": "g/L",
+      "reference_min": null,
+      "reference_max": 1.5
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+<section
+  class="welcome-stage"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave()"
+  (drop)="onDrop($event)"
+>
+  <div class="welcome-center">
+    <!-- Illustration document + goutte -->
+    <div class="hero-illustration" aria-hidden="true">
+      <svg viewBox="0 0 180 140" fill="none">
+        <ellipse cx="90" cy="74" rx="72" ry="52" fill="#f1edff" />
+        <rect
+          x="52"
+          y="22"
+          width="76"
+          height="94"
+          rx="12"
+          fill="#ffffff"
+          stroke="#5b42f3"
+          stroke-width="2.5"
+        />
+        <path d="M108 22V38C108 40.2 109.8 42 112 42H128" fill="#ede9fe" />
+        <path
+          d="M108 22L128 42"
+          stroke="#5b42f3"
+          stroke-width="2.5"
+          stroke-linecap="round"
+        />
+        <path
+          d="M90 48C90 48 79 60.5 79 68C79 74.0751 83.9249 79 90 79C96.0751 79 101 74.0751 101 68C101 60.5 90 48 90 48Z"
+          fill="#9d4edd"
+        />
+        <line x1="70" y1="91" x2="110" y2="91" stroke="#c4b5fd" stroke-width="4" stroke-linecap="round" />
+        <line x1="74" y1="102" x2="106" y2="102" stroke="#ddd6fe" stroke-width="4" stroke-linecap="round" />
+        <path d="M136 28L144 20M142 38L152 36" stroke="#4b32c3" stroke-width="2.8" stroke-linecap="round" />
+      </svg>
+    </div>
+
+    <h1>Bonjour, comment puis-je<br />vous aider avec votre bilan ?</h1>
+
+    <input
+      #fileInput
+      type="file"
+      accept=".pdf,.png,.jpg,.jpeg"
+      (change)="onFileSelected($event)"
+      hidden
+    />
+
+    <!-- Barre pilule type ChatGPT/Claude -->
+    <div
+      class="composer-pill"
+      [class.dragging]="isDragging"
+      (click)="!selectedFile && fileInput.click()"
+      role="group"
+      aria-label="Déposer votre bilan"
+    >
+      <button
+        type="button"
+        class="attach-btn"
+        (click)="$event.stopPropagation(); fileInput.click()"
+        [disabled]="isUploading"
+        aria-label="Joindre un PDF ou une image"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21.44 11.05l-8.49 8.49a5.5 5.5 0 01-7.78-7.78l8.49-8.49a3.5 3.5 0 014.95 4.95l-8.49 8.49a1.5 1.5 0 01-2.12-2.12l7.78-7.78"
+          />
+        </svg>
+      </button>
+
+      @if (selectedFile) {
+        <div class="selected-chip">
+          <span class="chip-name">{{ selectedFile.name }}</span>
+          <span class="chip-size">{{ formatSize(selectedFile.size) }}</span>
+          @if (!isUploading) {
+            <button
+              type="button"
+              class="chip-clear"
+              (click)="clearFile($event)"
+              aria-label="Retirer le fichier"
+            >
+              ×
+            </button>
+          }
+        </div>
+      } @else {
+        <span class="composer-placeholder">
+          {{ isDragging ? 'Déposez votre fichier ici...' : 'Joindre un PDF ou une image...' }}
+        </span>
+      }
+
+      <button
+        type="button"
+        class="send-btn"
+        [class.ready]="!!selectedFile"
+        [disabled]="isUploading"
+        (click)="$event.stopPropagation(); onSubmit(fileInput)"
+        [attr.aria-label]="selectedFile ? 'Lancer l’analyse' : 'Choisir un fichier'"
+      >
+        @if (isUploading) {
+          <span class="mini-spinner" aria-hidden="true"></span>
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        }
+      </button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="error-box inline-err">{{ errorMessage }}</div>
+    }
+
+    <p class="privacy-line">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 3l7 3v5c0 5-3.5 8.8-7 10-3.5-1.2-7-5-7-10V6l7-3z"
+        />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.2l1.7 1.7 3.5-3.6" />
+      </svg>
+      <span>Outil pédagogique · Suppression automatique après 1h</span>
+    </p>
+  </div>
+
+  <!-- Vague lavande décorative en bas -->
+  <svg class="bottom-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path
+      d="M0,48 C320,108 620,12 960,54 C1180,82 1330,66 1440,36 L1440,120 L0,120 Z"
+      fill="#eeeafd"
+    />
+  </svg>
+</section>

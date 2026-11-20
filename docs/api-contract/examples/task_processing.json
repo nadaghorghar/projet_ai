@@ -1,0 +1,13 @@
+{
+  "task_id": "3f2b8c1e-6a52-4d7e-9a0c-1b2d3e4f5a6b",
+  "status": "processing",
+  "document": {"filename": "bilan.pdf", "extraction_method": null},
+  "detected_categories": [],
+  "parameters": [],
+  "pending_question": null,
+  "report_id": null,
+  "explanations": null,
+  "sources": [],
+  "disclaimer": "Outil pédagogique : ce bilan ne remplace pas une consultation médicale et ne constitue ni un diagnostic ni une prescription.",
+  "errors": []
+}

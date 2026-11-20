@@ -1,0 +1,22 @@
+<div class="thread-container">
+  <div class="file-bubble">
+    <div class="file-icon-box">DOC</div>
+    <div class="file-meta">
+      <div class="file-name">{{ filename }}</div>
+      <div class="file-sub">Analyse en cours</div>
+    </div>
+  </div>
+
+  <div class="assistant-card wait-card">
+    <div class="spinner" aria-hidden="true"></div>
+    <h2>Lecture de votre bilan en cours...</h2>
+    <p class="wait-desc">
+      LabMind extrait vos paramètres et vérifie les valeurs par rapport aux fourchettes de votre
+      laboratoire. Cela prend quelques secondes.
+    </p>
+
+    <button type="button" class="btn btn-ghost-danger" (click)="cancelAndDelete()">
+      Annuler et supprimer
+    </button>
+  </div>
+</div>

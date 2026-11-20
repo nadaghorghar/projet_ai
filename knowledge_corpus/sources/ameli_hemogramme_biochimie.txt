@@ -1,0 +1,34 @@
+Comprendre les indices de l'hémogramme (NFS) et les dosages biochimiques courants (Assurance Maladie - ameli.fr)
+
+La numération formule sanguine (NFS) ou hémogramme analyse les cellules présentes dans le sang :
+
+Globules rouges (hématies) et hémoglobine :
+Les globules rouges (hématies) contiennent l'hémoglobine, une protéine qui assure le transport de l'oxygène des poumons vers les tissus de l'organisme.
+- L'hématocrite (HCT) correspond au pourcentage du volume sanguin occupé par les globules rouges.
+- Le Volume Globulaire Moyen (VGM) mesure la taille moyenne des globules rouges.
+- La Teneur Corpusculaire Moyenne en Hémoglobine (TCMH) indique la quantité moyenne d'hémoglobine contenue dans un globule rouge.
+- La Concentration Corpusculaire Moyenne en Hémoglobine (CCMH) exprime la concentration moyenne d'hémoglobine à l'intérieur des globules rouges.
+
+Globules blancs (leucocytes) et formule leucocytaire :
+Les globules blancs participent aux défenses immunitaires de l'organisme contre les infections et les agressions extérieures. La formule leucocytaire détaille leurs différentes catégories :
+- Polynucléaires neutrophiles : première ligne de défense impliquée notamment dans la réponse aux bactéries.
+- Lymphocytes : cellules clés de l'immunité spécifique (réponse antivirale et production d'anticorps).
+- Monocytes : cellules impliquées dans le nettoyage des débris cellulaires et la défense immunitaire.
+- Polynucléaires éosinophiles : cellules intervenant notamment lors des réactions allergiques et de certaines défenses antiparasitaires.
+- Polynucléaires basophiles : catégorie minoritaire de globules blancs participant aux réponses immunitaires et allergiques.
+
+Plaquettes (thrombocytes) :
+Les plaquettes sont des fragments cellulaires qui jouent un rôle essentiel dans la coagulation du sang et l'arrêt des saignements.
+
+Paramètres biochimiques courants :
+- Créatinine : indicateur utilisé pour évaluer le fonctionnement des reins ; issue de la dégradation de la créatine musculaire, elle est éliminée dans les urines.
+- Urée : déchet azoté provenant de la transformation des protéines alimentaires, éliminé par les reins.
+- Débit de filtration glomérulaire (DFG) : estimation de la capacité de filtration rénale calculée à partir de la créatinine.
+- Acide urique : produit final de la dégradation des purines, éliminé majoritairement par voie rénale.
+- Calcium plasmatique : minéral important pour les os, les dents, la contraction musculaire, la coagulation et la transmission nerveuse.
+- Magnésium plasmatique : minéral essentiel au métabolisme énergétique, aux muscles et au système nerveux ; un taux bas peut parfois s'accompagner de fatigue, faiblesse ou crampes musculaires.
+- Fer sérique et transferrine : paramètres évaluant le fer circulant et sa protéine de transport dans le sang, en complément de la ferritine (réserves de fer).
+- Hémoglobine glyquée (HbA1c) : reflet de l'équilibre moyen de la glycémie sur les deux à trois derniers mois.
+- Bilirubine : pigment issu de la dégradation de l'hémoglobine et éliminé par le foie.
+
+En présence d'une valeur située en dehors des intervalles de référence du laboratoire, il convient de consulter son médecin pour évaluer si un contrôle ou un avis complémentaire est utile.
