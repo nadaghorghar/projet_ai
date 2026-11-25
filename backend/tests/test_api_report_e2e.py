@@ -131,8 +131,8 @@ def test_api_end_to_end_generates_real_sourced_pdf_and_cleans_up(tmp_path):
         assert "Cholestérol LDL" in extracted
         assert "Hématocrite" in extracted
         assert "La glycémie mesure le taux de sucre dans le sang" in extracted
-        assert "ameli-prise-sang-2026" in extracted
-        assert "Assurance Maladie" in extracted
+        assert "Sources médicales" not in extracted
+        assert "ameli-prise-sang-2026" not in extracted
         assert extracted.count(DISCLAIMER) == 1
 
         assert client.delete(f"/v1/tasks/{task_id}").status_code == 204

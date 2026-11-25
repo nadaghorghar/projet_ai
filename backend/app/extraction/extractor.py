@@ -17,6 +17,8 @@ from app.core.config import Settings, get_settings
 
 IMAGE_SUFFIXES = (".png", ".jpg", ".jpeg", ".tif", ".tiff")
 _DOT_LEADER_TOKEN_RE = re.compile(r"^[.\u2026·•_\-]{2,}$")
+_PUNCT_ONLY_RE = re.compile(r"^[.,;:)\]}%°]+$")
+_OPEN_PUNCT_RE = re.compile(r"^[\(\[{]+$")
 _PARAM_LINE_HINT_RE = re.compile(
     r"\d+(?:[.,]\d+)?\s*(?:g/d?l|mg/l|mg/dl|mmol/l|µmol/l|umol/l|%|fl|pg|/mm|millions)",
     re.I,
@@ -90,34 +92,36 @@ def _deskew_gray(gray_norm: np.ndarray) -> np.ndarray:
     )
 
 
+def _remove_long_table_lines(gray_norm: np.ndarray) -> np.ndarray:
+    """Supprime uniquement les longs filets de tableau sans éroder les virgules/points."""
+    h, w = gray_norm.shape[:2]
+    bw = cv2.threshold(gray_norm, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+    h_len = max(140, w // 8)
+    v_len = max(100, h // 10)
+    h_lines = cv2.morphologyEx(bw, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (h_len, 1)))
+    v_lines = cv2.morphologyEx(bw, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, v_len)))
+    line_mask = cv2.add(h_lines, v_lines)
+    cleaned = gray_norm.copy()
+    cleaned[line_mask > 0] = 255
+    return cleaned
+
+
 def preprocess(img: Image.Image) -> Image.Image:
-    """Correction EXIF, agrandissement, éclairage, redressement et nettoyage sans casser les virgules."""
+    """Correction EXIF, agrandissement, éclairage, redressement et netteté douce préservant les virgules."""
     img = ImageOps.exif_transpose(img)
     g = np.array(img.convert("L"))
     if g.shape[1] < 2400:
-        f = min(2.5, 2400 / max(g.shape[1], 1))
+        f = min(2.8, 2400 / max(g.shape[1], 1))
         g = cv2.resize(g, None, fx=f, fy=f, interpolation=cv2.INTER_CUBIC)
     sigma = max(25, min(85, int(g.shape[1] * 0.025)))
     bg = cv2.GaussianBlur(g, (0, 0), sigmaX=sigma, sigmaY=sigma)
     bg = np.maximum(bg, 1)
-    norm = np.clip((g.astype(np.float32) / bg.astype(np.float32)) * 255.0, 0, 255).astype(
-        np.uint8
-    )
+    norm = np.clip((g.astype(np.float32) / bg.astype(np.float32)) * 255.0, 0, 255).astype(np.uint8)
     norm = _deskew_gray(norm)
-    bw = cv2.threshold(norm, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-    h_lines = cv2.morphologyEx(
-        bw, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (60, 1))
-    )
-    v_lines = cv2.morphologyEx(
-        bw, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, 40))
-    )
-    line_mask = cv2.dilate(cv2.add(h_lines, v_lines), np.ones((3, 3), np.uint8))
-    cleaned = norm.copy()
-    cleaned[line_mask > 0] = 255
-    stretched = np.clip((cleaned.astype(np.float32) - 35.0) * (255.0 / 190.0), 0, 255).astype(
-        np.uint8
-    )
-    return Image.fromarray(stretched)
+    cleaned = _remove_long_table_lines(norm)
+    blur_small = cv2.GaussianBlur(cleaned, (0, 0), sigmaX=1.0)
+    sharpened = cv2.addWeighted(cleaned, 1.35, blur_small, -0.35, 0)
+    return Image.fromarray(np.clip(sharpened, 0, 255).astype(np.uint8))
 
 
 def _preprocess_contrast(img: Image.Image) -> Image.Image:
@@ -125,34 +129,40 @@ def _preprocess_contrast(img: Image.Image) -> Image.Image:
     img = ImageOps.exif_transpose(img)
     g = np.array(img.convert("L"))
     if g.shape[1] < 2400:
-        f = min(2.5, 2400 / max(g.shape[1], 1))
+        f = min(2.8, 2400 / max(g.shape[1], 1))
         g = cv2.resize(g, None, fx=f, fy=f, interpolation=cv2.INTER_CUBIC)
-    clahe = cv2.createCLAHE(clipLimit=2.4, tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(clipLimit=2.2, tileGridSize=(8, 8))
     enhanced = clahe.apply(g)
     sigma = max(25, min(85, int(enhanced.shape[1] * 0.025)))
     bg = cv2.GaussianBlur(enhanced, (0, 0), sigmaX=sigma, sigmaY=sigma)
     bg = np.maximum(bg, 1)
-    norm = np.clip((enhanced.astype(np.float32) / bg.astype(np.float32)) * 255.0, 0, 255).astype(
-        np.uint8
-    )
+    norm = np.clip((enhanced.astype(np.float32) / bg.astype(np.float32)) * 255.0, 0, 255).astype(np.uint8)
     norm = _deskew_gray(norm)
-    stretched = np.clip((norm.astype(np.float32) - 45.0) * (255.0 / 170.0), 0, 255).astype(
-        np.uint8
-    )
+    norm = _remove_long_table_lines(norm)
+    stretched = np.clip((norm.astype(np.float32) - 20.0) * (255.0 / 215.0), 0, 255).astype(np.uint8)
     return Image.fromarray(stretched)
 
 
+def _repair_ocr_line(line: str) -> str:
+    """Reconstitue les séparateurs décimaux espacés par l'OCR sans altérer les milliers."""
+    fixed = re.sub(r"(\d)\s*([.,])\s*(\d)", r"\1\2\3", line)
+    return " ".join(fixed.split()).strip()
+
+
 def _reconstruct_rows_from_ocr_data(data: dict) -> list[str]:
-    """Regroupe les mots OCR par ordonnée Y pour préserver les lignes à points de suite."""
-    tokens: list[tuple[float, float, float, str]] = []
+    """Regroupe les mots OCR par ordonnée Y en préservant les virgules et les lignes proches."""
+    tokens: list[tuple[float, float, float, float, str]] = []
     texts = data.get("text", [])
     lefts = data.get("left", [])
     tops = data.get("top", [])
+    widths = data.get("width", [])
     heights = data.get("height", [])
     confs = data.get("conf", [])
 
     word_heights: list[float] = []
-    for raw_txt, raw_left, raw_top, raw_h, raw_conf in zip(texts, lefts, tops, heights, confs):
+    for raw_txt, raw_left, raw_top, raw_w, raw_h, raw_conf in zip(
+        texts, lefts, tops, widths, heights, confs
+    ):
         txt = str(raw_txt).strip()
         if not txt or _DOT_LEADER_TOKEN_RE.match(txt):
             continue
@@ -160,36 +170,66 @@ def _reconstruct_rows_from_ocr_data(data: dict) -> list[str]:
             conf_val = float(raw_conf)
         except (TypeError, ValueError):
             conf_val = 0.0
-        if conf_val < 0:
+        if conf_val < 0 and txt not in (",", ".", "%", "(", ")", "-"):
             continue
         h_val = float(raw_h) if raw_h else 18.0
+        w_val = float(raw_w) if raw_w else 6.0
         if 8.0 <= h_val <= 120.0:
             word_heights.append(h_val)
         cy = float(raw_top) + h_val * 0.5
-        tokens.append((cy, float(raw_left), h_val, txt))
+        left_f = float(raw_left)
+        right_f = left_f + w_val
+        tokens.append((cy, left_f, right_f, h_val, txt))
 
     if not tokens:
         return []
 
     med_h = median(word_heights) if word_heights else 22.0
-    row_tol = max(12.0, med_h * 0.65)
+    row_tol = max(10.0, med_h * 0.55)
+    max_drift = max(16.0, med_h * 0.85)
     tokens.sort(key=lambda item: (item[0], item[1]))
 
-    rows: list[list[tuple[float, float, float, str]]] = []
-    row_centers: list[float] = []
+    rows: list[list[tuple[float, float, float, float, str]]] = []
+    row_anchors: list[tuple[float, float]] = []  # (first_cy, avg_cy)
     for tok in tokens:
         cy = tok[0]
-        if row_centers and abs(cy - row_centers[-1]) <= row_tol:
+        if (
+            row_anchors
+            and abs(cy - row_anchors[-1][1]) <= row_tol
+            and abs(cy - row_anchors[-1][0]) <= max_drift
+        ):
             rows[-1].append(tok)
-            row_centers[-1] = sum(t[0] for t in rows[-1]) / len(rows[-1])
+            first_cy = row_anchors[-1][0]
+            avg_cy = sum(t[0] for t in rows[-1]) / len(rows[-1])
+            row_anchors[-1] = (first_cy, avg_cy)
         else:
             rows.append([tok])
-            row_centers.append(cy)
+            row_anchors.append((cy, cy))
 
     reconstructed: list[str] = []
     for row in rows:
         row.sort(key=lambda item: item[1])
-        line = " ".join(item[3] for item in row).strip()
+        parts: list[str] = []
+        prev_right: float | None = None
+        prev_txt = ""
+        for _, left_f, right_f, _, txt in row:
+            if not parts:
+                parts.append(txt)
+            else:
+                dx = left_f - (prev_right if prev_right is not None else left_f)
+                tight_attach = dx <= med_h * 0.45 and (
+                    _PUNCT_ONLY_RE.match(txt)
+                    or _OPEN_PUNCT_RE.match(prev_txt)
+                    or (prev_txt.endswith((",", ".")) and txt[0].isdigit())
+                    or (prev_txt[-1].isdigit() and txt[0] in (",", "."))
+                )
+                if tight_attach:
+                    parts[-1] = parts[-1] + txt
+                else:
+                    parts.append(txt)
+            prev_right = right_f
+            prev_txt = txt
+        line = _repair_ocr_line(" ".join(parts))
         if line:
             reconstructed.append(line)
     return reconstructed
@@ -202,6 +242,7 @@ def _run_ocr_pass(
 ) -> tuple[str, list[str], float | None]:
     config = f"--oem 3 --psm {psm} -c preserve_interword_spaces=1"
     text = pytesseract.image_to_string(prepared, lang=lang, config=config)
+    text = "\n".join(_repair_ocr_line(ln) for ln in text.splitlines() if ln.strip())
     avg_conf: float | None = None
     rows: list[str] = []
     try:
@@ -235,7 +276,7 @@ def _merge_lines(*line_groups: list[str]) -> list[str]:
     seen: set[str] = set()
     for group in line_groups:
         for raw in group:
-            cleaned = " ".join(raw.split())
+            cleaned = _repair_ocr_line(raw)
             if cleaned and cleaned not in seen:
                 seen.add(cleaned)
                 merged.append(cleaned)
@@ -246,23 +287,24 @@ def _ocr_image_bundle(
     img: Image.Image,
     settings: Settings | None = None,
 ) -> tuple[str, list[str], float | None]:
-    """Exécute l'OCR multi-passes avec reconstruction de lignes pour tableaux médicaux."""
+    """Exécute l'OCR multi-passes avec préservation des virgules et reconstruction de lignes."""
     settings = settings or get_settings()
     lang = ocr_lang(settings)
 
     prep_primary = preprocess(img)
     txt1, rows1, conf1 = _run_ocr_pass(prep_primary, lang, psm=4)
-    lines1 = _merge_lines(rows1, txt1.splitlines())
+    lines1 = _merge_lines(txt1.splitlines(), rows1)
     hints1 = _count_param_hints(lines1)
 
     best_conf = conf1
     all_rows = list(rows1)
     all_texts = [txt1]
 
-    if hints1 < 3 or len("\n".join(lines1)) < 150:
+    # Passe 2 systématique si moins de 12 paramètres détectés (ex. photo complète avec Hématocrite ou décimales)
+    if hints1 < 12 or len("\n".join(lines1)) < 350:
         prep_contrast = _preprocess_contrast(img)
         txt2, rows2, conf2 = _run_ocr_pass(prep_contrast, lang, psm=6)
-        lines2 = _merge_lines(rows2, txt2.splitlines())
+        lines2 = _merge_lines(txt2.splitlines(), rows2)
         hints2 = _count_param_hints(lines2)
         if hints2 > 0 or len(txt2.strip()) > len(txt1.strip()):
             all_rows = _merge_lines(all_rows, rows2)
@@ -275,14 +317,15 @@ def _ocr_image_bundle(
                 rotated = img.rotate(angle, expand=True)
                 prep_rot = _preprocess_contrast(rotated)
                 txtr, rowsr, confr = _run_ocr_pass(prep_rot, lang, psm=4)
-                linesr = _merge_lines(rowsr, txtr.splitlines())
+                linesr = _merge_lines(txtr.splitlines(), rowsr)
                 if _count_param_hints(linesr) >= 2:
                     all_rows = linesr
                     all_texts = [txtr]
                     best_conf = confr
                     break
 
-    combined_lines = _merge_lines(all_rows, *(t.splitlines() for t in all_texts))
+    # Placer le texte brut avant `rows` pour préserver les virgules de `image_to_string`, tout en gardant `rows`
+    combined_lines = _merge_lines(*(t.splitlines() for t in all_texts), all_rows)
     combined_text = "\n".join(combined_lines) if combined_lines else txt1
     return combined_text, all_rows, best_conf
 

@@ -96,7 +96,7 @@ class MealPlanRow(BaseModel):
 
 
 class NutritionPlan(BaseModel):
-    """Section structurée d'orientation alimentaire sourcée (ANSES / Ciqual / Ameli)."""
+    """Section structurée d'orientation alimentaire sourcée (ANSES / Ciqual / OMS / Ameli)."""
 
     status: ExplanationStatus
     intro: str = ""
@@ -104,6 +104,15 @@ class NutritionPlan(BaseModel):
     highlights: list[NutritionHighlight] = Field(default_factory=list)
     daily_meal_plan: list[MealPlanRow] = Field(default_factory=list)
     source_ids: list[str] = Field(default_factory=list)
+
+
+class GuidanceSections(BaseModel):
+    """Orientation structurée par domaines (nutrition, activité, habitudes de vie, suivi)."""
+
+    nutrition: list[str] = Field(default_factory=list)
+    physical_activity: list[str] = Field(default_factory=list)
+    lifestyle_prevention: list[str] = Field(default_factory=list)
+    medical_followup: list[str] = Field(default_factory=list)
 
 
 class GenerationRequest(BaseModel):
@@ -119,10 +128,12 @@ class GenerationResult(BaseModel):
     """Sortie structurée du module de génération, alignée sur le contrat API v1."""
 
     summary: str | None = None
+    general_summary: str | None = None
     parameter_explanations: list[ParameterExplanation] = Field(default_factory=list)
     section_summaries: list[SectionSummaryItem] = Field(default_factory=list)
     lifestyle_info: LifestyleInfo | None = None
     nutrition_plan: NutritionPlan | None = None
+    guidance_sections: GuidanceSections | None = None
     action_steps: list[str] = Field(default_factory=list)
     consultation_questions: list[str] = Field(default_factory=list)
     sources: list[Source] = Field(default_factory=list)
@@ -136,6 +147,8 @@ class GenerationResult(BaseModel):
                 item.model_dump(mode="json") for item in self.parameter_explanations
             ],
         }
+        if self.general_summary:
+            payload["general_summary"] = self.general_summary
         if self.section_summaries:
             payload["section_summaries"] = [
                 item.model_dump(mode="json") for item in self.section_summaries
@@ -144,6 +157,8 @@ class GenerationResult(BaseModel):
             payload["lifestyle_info"] = self.lifestyle_info.model_dump(mode="json")
         if self.nutrition_plan is not None:
             payload["nutrition_plan"] = self.nutrition_plan.model_dump(mode="json")
+        if self.guidance_sections is not None:
+            payload["guidance_sections"] = self.guidance_sections.model_dump(mode="json")
         if self.action_steps:
             payload["action_steps"] = list(self.action_steps)
         if self.consultation_questions:

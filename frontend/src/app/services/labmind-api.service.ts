@@ -173,22 +173,66 @@ export class LabmindApiService {
       report_id: 'r-3f2b8c1e',
       explanations: {
         summary: 'Explications pédagogiques produites exclusivement à partir des sources documentaires vérifiées.',
+        general_summary: "Sur 2 paramètre(s) analysé(s), l'hémoglobine est dans la norme du laboratoire. Élément à discuter avec votre médecin : globules blancs légèrement au-dessus de la référence.",
         parameter_explanations: [
           {
             code: 'WBC',
             status: 'grounded',
-            text: "Les globules blancs (leucocytes) participent aux défenses de l'organisme. Une valeur supérieure à la fourchette du laboratoire justifie d'en parler lors d'une consultation médicale.",
+            text: "Les globules blancs participent aux défenses de l'organisme contre les infections. Votre valeur est au-dessus de la borne du laboratoire ; un échange avec votre médecin permet d'en préciser le contexte.",
+            source_ids: ['ameli-prise-sang-2026']
+          },
+          {
+            code: 'HGB',
+            status: 'grounded',
+            text: "L'hémoglobine transporte l'oxygène vers les tissus. Votre résultat se situe dans l'intervalle normal du laboratoire.",
             source_ids: ['ameli-prise-sang-2026']
           }
         ],
+        nutrition_plan: {
+          status: 'grounded',
+          intro: "Une alimentation variée et équilibrée soutient le bon fonctionnement général de l'organisme (repères OMS / ANSES).",
+          section_title: 'Aliments d’une assiette équilibrée',
+          highlights: [
+            { title: 'Amandes', subtitle: 'Oléagineux source de minéraux et fibres.', image_key: 'almonds_walnuts' },
+            { title: 'Noix', subtitle: 'Apport complémentaire en minéraux et acides gras.', image_key: 'walnuts' },
+            { title: 'Épinards', subtitle: 'Légumes verts riches en folates et magnésium.', image_key: 'spinach' },
+            { title: 'Lentilles', subtitle: 'Légumineuses sources de minéraux et protéines végétales.', image_key: 'lentils_chickpeas' },
+            { title: 'Graines de courge', subtitle: 'Graines naturellement concentrées en magnésium.', image_key: 'pumpkin_seeds' }
+          ],
+          daily_meal_plan: [
+            { meal: 'Petit-déjeuner', example: 'Flocons d’avoine ou pain complet + fruit frais' },
+            { meal: 'Déjeuner', example: 'Poisson + légumes verts + céréales complètes' },
+            { meal: 'Dîner', example: 'Soupe de légumes variés + yaourt nature' }
+          ],
+          source_ids: ['oms-has-nutrition-suivi-2025']
+        },
+        guidance_sections: {
+          nutrition: [
+            'Composer des repas variés avec légumes, fruits frais, céréales complètes et protéines adaptées.',
+            'Maintenir une hydratation régulière principalement à base d’eau tout au long de la journée.'
+          ],
+          physical_activity: [
+            'Privilégier une activité physique douce et progressive, comme la marche régulière.',
+            'Limiter les périodes prolongées en position assise par de courtes pauses actives.'
+          ],
+          lifestyle_prevention: [
+            'Conserver des horaires de sommeil réguliers pour soutenir la récupération.',
+            'Éviter le tabac et limiter la consommation d’alcool ; un accompagnement médical sans jugement aide en cas de besoin.'
+          ],
+          medical_followup: [
+            'Consulter votre médecin traitant pour discuter de la valeur de globules blancs et de vos éventuels symptômes.',
+            'Réaliser un contrôle biologique uniquement si votre médecin le recommande et respecter tout traitement prescrit.'
+          ]
+        },
         lifestyle_info: {
           status: 'grounded',
-          text: "Une alimentation variée, une hydratation régulière et un sommeil suffisant contribuent au bon équilibre général, selon les repères publics de l'ANSES.",
-          source_ids: ['anses-reperes-2026']
+          text: "Une alimentation variée, une hydratation régulière, une activité physique adaptée et un sommeil suffisant soutiennent l'équilibre général (repères OMS / ANSES / HAS).",
+          source_ids: ['oms-has-nutrition-suivi-2025']
         },
         consultation_questions: [
-          'Cette valeur de globules blancs nécessite-t-elle un contrôle ultérieur ?',
-          'Y a-t-il des éléments cliniques à prendre en compte avec ces résultats ?'
+          'Mon taux de globules blancs est légèrement au-dessus de la normale. Est-il nécessaire de le contrôler ?',
+          'Une infection récente ou un facteur passager peut-il expliquer cette hausse ?',
+          'Faut-il réaliser d’autres examens pour mieux comprendre ce résultat ?'
         ]
       },
       sources: [

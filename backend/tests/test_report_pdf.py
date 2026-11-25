@@ -106,8 +106,8 @@ def test_build_report_contains_results_citations_accents_and_single_disclaimer()
     assert "Cholestérol LDL" in text
     assert "< 1.6" in text
     assert "La glycémie mesure le taux de sucre dans le sang." in text
-    assert "ameli-prise-sang-2026" in text
-    assert "Assurance Maladie" in text
+    assert "Sources médicales" not in text
+    assert "ameli-prise-sang-2026" not in text
     assert "unité absente du document" in text
     # Pas de section hygiène de vie sans source dédiée
     assert "hygiène de vie" not in text
@@ -151,5 +151,5 @@ def test_long_table_paginates_cleanly_and_includes_lifestyle_only_when_sourced()
     text, page_count = _extract_pdf_text(pdf_bytes)
     assert page_count >= 2
     assert "hygiène de vie" in text
-    assert "anses-nutrition-2025" in text
+    assert "Sources médicales" not in text
     assert text.count(DISCLAIMER) == 1

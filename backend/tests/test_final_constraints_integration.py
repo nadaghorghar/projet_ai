@@ -127,7 +127,8 @@ def test_six_categories_agent_rag_pdf_and_full_deletion_e2e(tmp_path):
         with pymupdf.open(stream=pdf_resp.content, filetype="pdf") as doc:
             pdf_text = " ".join(" ".join(p.get_text("text") for p in doc).split())
         assert "La glycémie mesure le taux de sucre dans le sang." in pdf_text
-        assert "ameli-prise-sang-2026" in pdf_text
+        assert "Sources médicales" not in pdf_text
+        assert "ameli-prise-sang-2026" not in pdf_text
         assert pdf_text.count(DISCLAIMER) == 1
 
         # 4. Suppression définitive (API + disque + base SQLite)

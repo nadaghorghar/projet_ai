@@ -136,6 +136,61 @@
       "notes": "Repères pratiques PNNS / ameli.fr pour la population adulte."
     },
     {
+      "source_id": "medlineplus-niddk-ada-lab-tests-2026",
+      "title": "Comprendre les analyses médicales, glycémie, HbA1c et limites d'interprétation",
+      "organisme": "MedlinePlus / NIDDK / ADA",
+      "url": "https://medlineplus.gov/lab-tests/how-to-understand-your-lab-results/",
+      "published_date": "2026-01-10",
+      "categories": [
+        "nfs",
+        "bilan_martial",
+        "bilan_glycemique",
+        "bilan_lipidique",
+        "bilan_hepatique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "valeurs_reference",
+        "limites_interpretation",
+        "glycemie",
+        "hba1c",
+        "cholesterol",
+        "creatinine",
+        "hepatique",
+        "ferritine",
+        "calcium",
+        "magnesium"
+      ],
+      "reuse_conditions": "Synthèse pédagogique sourcée à partir de ressources publiques MedlinePlus, NIDDK et ADA (citées avec URLs).",
+      "local_filename": "medlineplus_niddk_ada_lab_tests.txt",
+      "status": "collected",
+      "notes": "Couvre MedlinePlus, NIDDK (tests diabète) et repères ADA 2026 sur les précautions et examens complémentaires."
+    },
+    {
+      "source_id": "oms-has-nutrition-suivi-2025",
+      "title": "Alimentation saine (OMS) et repères de suivi médical et vigilance (HAS)",
+      "organisme": "OMS / HAS",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+      "published_date": "2025-07-15",
+      "categories": [
+        "hygiene_de_vie",
+        "bilan_glycemique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "alimentation_saine",
+        "hydratation",
+        "activite_physique",
+        "comparaison_anterieure",
+        "signes_alerte",
+        "suivi_medical"
+      ],
+      "reuse_conditions": "Synthèse pédagogique sourcée OMS (Healthy Diet) et HAS (Guide parcours diabète de type 2, juillet 2025).",
+      "local_filename": "oms_has_nutrition_suivi.txt",
+      "status": "collected",
+      "notes": "Intègre les recommandations OMS nutritionnelles, les précautions HAS sur le suivi et les contre-indications individuelles."
+    },
+    {
       "source_id": "plan-inserm-fer-anemie",
       "title": "Dossier métabolisme du fer et anémie",
       "organisme": "Inserm",
@@ -232,6 +287,67 @@
       "local_filename": null,
       "status": "pending_collection",
       "notes": "Vérifier fiche HAS ou société savante d'hépatologie (AFEF) / ameli.fr."
+    },
+    {
+      "source_id": "ada-standards-of-care-2026",
+      "title": "Standards of Care in Diabetes — Repères glycémiques et suivi biologique",
+      "organisme": "ADA (American Diabetes Association)",
+      "url": "https://diabetesjournals.org/care",
+      "published_date": "2026-01-01",
+      "categories": [
+        "bilan_glycemique"
+      ],
+      "themes": [
+        "glycemie",
+        "hba1c",
+        "suivi_medical"
+      ],
+      "reuse_conditions": "Synthèse pédagogique sourcée American Diabetes Association (diabetesjournals.org/care).",
+      "local_filename": "ada_standards_of_care.txt",
+      "status": "collected",
+      "notes": "Repères ADA 2026 sur la lecture de la glycémie, HbA1c et confirmation biologique."
+    },
+    {
+      "source_id": "niddk-diagnostic-tests-2025",
+      "title": "Comprendre les tests de glycémie et l’HbA1c",
+      "organisme": "NIDDK (NIH)",
+      "url": "https://www.niddk.nih.gov/health-information/diagnostic-tests/a1c-test",
+      "published_date": "2025-06-01",
+      "categories": [
+        "bilan_glycemique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "glycemie",
+        "hba1c",
+        "creatinine",
+        "suivi_medical"
+      ],
+      "reuse_conditions": "Synthèse pédagogique sourcée NIDDK / NIH (domaine public fédéral US).",
+      "local_filename": "niddk_diagnostic_tests.txt",
+      "status": "collected",
+      "notes": "Ressource NIDDK sur le dosage à jeun, HbA1c et contrôle de confirmation."
+    },
+    {
+      "source_id": "has-suivi-medical-2025",
+      "title": "Parcours de soins et repères de suivi médical et activité physique",
+      "organisme": "Haute Autorité de Santé (HAS)",
+      "url": "https://www.has-sante.fr/upload/docs/application/pdf/2025-07/parcours_de_soins_du_patient_adulte_vivant_avec_un_diabete_de_type_2_-_guide_2025-07-15_16-42-8_797.pdf",
+      "published_date": "2025-07-15",
+      "categories": [
+        "hygiene_de_vie",
+        "bilan_glycemique",
+        "bilan_renal"
+      ],
+      "themes": [
+        "suivi_medical",
+        "activite_physique",
+        "signes_alerte"
+      ],
+      "reuse_conditions": "Synthèse pédagogique sourcée Haute Autorité de Santé (HAS, juillet 2025).",
+      "local_filename": "has_suivi_medical.txt",
+      "status": "collected",
+      "notes": "Guide parcours HAS sur suivi médical, activité physique adaptée et vigilance clinique."
     }
   ]
 }

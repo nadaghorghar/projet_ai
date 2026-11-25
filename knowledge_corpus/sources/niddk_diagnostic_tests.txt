@@ -1,0 +1,8 @@
+TITRE : Diagnostic Tests for Diabetes and Metabolic Lab Results (NIDDK / NIH)
+ORGANISME : National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK / NIH)
+URL : https://www.niddk.nih.gov/health-information/diagnostic-tests/a1c-test
+CONDITIONS : Synthèse pédagogique fidèle des ressources publiques du NIDDK (NIH).
+
+- La glycémie à jeun mesure le glucose sanguin après au moins 8 heures sans apport calorique ; un stress aigu ou un jeûne incomplet peuvent modifier la mesure.
+- Les tests glycémiques et rénaux (créatinine, DFG estimé) sont interprétés conjointement par le médecin selon l'âge, l'hydratation et les symptômes.
+- Un contrôle biologique de confirmation est fréquemment demandé lorsqu'une valeur isolée sort de l'intervalle du laboratoire.

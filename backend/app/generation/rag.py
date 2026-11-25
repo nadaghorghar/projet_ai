@@ -18,6 +18,7 @@ from .grounding import (
     check_explanation_grounding,
     check_lifestyle_grounding,
     check_nutrition_grounding,
+    is_placeholder_text,
     sanitize_action_steps,
     sanitize_consultation_questions,
 )
@@ -25,6 +26,7 @@ from .interface import (
     ExplanationStatus,
     GenerationRequest,
     GenerationResult,
+    GuidanceSections,
     LifestyleInfo,
     MealPlanRow,
     NutritionHighlight,
@@ -41,13 +43,14 @@ SYSTEM_PROMPT = (
     "1. Réponds uniquement en JSON valide avec les clés : "
     '"status" ("grounded" ou "insufficient_sources"), "text" (chaîne sur une seule ligne), '
     '"source_ids" (liste de chaînes).\n'
-    "2. Rédige `text` en français clair, naturel et précis (2 à 3 phrases courtes) :\n"
-    "   - explique simplement le rôle de ce paramètre uniquement à partir de l'extrait fourni (ne confonds jamais deux paramètres) ;\n"
-    "   - situe la valeur par rapport à l'intervalle du laboratoire (« dans la norme », « en dessous de la norme », « légèrement bas » ou « au-dessus de la norme »), sans poser de diagnostic ;\n"
-    "   - si la valeur est hors norme, ajoute une phrase courte invitant à en parler à son médecin pour évaluer si un contrôle est utile ;\n"
-    "   - si l'extrait ne décrit pas ce paramètre précis, retourne status=\"insufficient_sources\" et source_ids=[].\n"
+    "2. Rédige `text` en français simple, direct et concis (2 phrases courtes maximum, 3 si hors norme) :\n"
+    "   - phrase 1 : rôle du paramètre dans l'organisme (strictement issu de l'extrait) ;\n"
+    "   - phrase 2 : signification du résultat par rapport aux bornes du laboratoire (si NORMAL : confirme clairement que la valeur est dans les normes et n'évoque JAMAIS d'anémie, de carence ou d'anomalie) ;\n"
+    "   - phrase 3 (uniquement si hors norme) : brève piste issue de l'extrait et invitation à en parler au médecin (avis rapide si écart marqué), sans jamais diagnostiquer.\n"
+    "   - si l'extrait ne couvre pas ce paramètre, retourne status=\"insufficient_sources\" et source_ids=[].\n"
     "3. Cite uniquement le source_id exact de l'extrait utilisé, sans inventer de chiffre."
 )
+
 
 LIFESTYLE_SYSTEM_PROMPT = (
     "Tu es un assistant d'information de santé publique pédagogique pour LabMind.\n"
@@ -55,54 +58,64 @@ LIFESTYLE_SYSTEM_PROMPT = (
     "1. Réponds uniquement en JSON valide avec les clés : "
     '"status" ("grounded" ou "insufficient_sources"), "text" (liste de 3 à 4 puces courtes commençant par « - »), '
     '"source_ids" (liste de chaînes).\n'
-    "2. Synthétise uniquement les repères généraux d'équilibre des repas, d'hydratation, d'activité physique ou de sources alimentaires présents dans les extraits officiels fournis, en français naturel et grammaticalement correct.\n"
-    "3. Ne mentionne un nutriment particulier que s'il figure à la fois dans les paramètres du patient et dans les extraits fournis.\n"
-    "4. N'écris JAMAIS de valeur chiffrée en milligramme ou gramme absente des extraits, et ne parle pas de contaminants ni des fourchettes de laboratoire.\n"
+    "2. Synthétise uniquement les repères généraux d'alimentation variée, d'hydratation, d'activité physique, de sommeil et d'arrêt du tabac/modération alcool présents dans les extraits officiels fournis.\n"
+    "3. Ne mentionne un nutriment particulier que s'il figure dans les paramètres du bilan et dans les extraits.\n"
+    "4. N'écris JAMAIS de valeur chiffrée absente des extraits, ni de contre-indication ignorée.\n"
     "5. Cite uniquement les source_ids exacts des extraits utilisés ; retourne status=\"grounded\" dès qu'un extrait officiel est fourni."
 )
 
 NUTRITION_SYSTEM_PROMPT = (
-    "Tu es un assistant d'information nutritionnelle pédagogique pour LabMind, strictement ancré dans les extraits ANSES / Ciqual / Ameli fournis.\n"
-    "Réponds UNIQUEMENT en JSON valide avec cette structure exacte :\n"
+    "Tu es un assistant d'information nutritionnelle pédagogique pour LabMind, strictement ancré dans les extraits officiels fournis.\n"
+    "Réponds UNIQUEMENT en JSON valide respectant les clés suivantes :\n"
     "{\n"
     '  "status": "grounded",\n'
-    '  "intro": "1 à 2 phrases reliant les paramètres notables aux repères ANSES/Ciqual des extraits",\n'
-    '  "section_title": "Titre court adapté (ex: A. Les aliments adaptés issus des repères ANSES)",\n'
-    '  "highlights": [\n'
-    '    {"title": "Nom court issu de l\'extrait", "subtitle": "Courte phrase descriptive tirée de l\'extrait", "image_key": "almonds_walnuts|pumpkin_seeds|spinach|lentils_chickpeas|balanced"}\n'
-    "  ],\n"
-    '  "daily_meal_plan": [\n'
-    '    {"meal": "Petit-déjeuner", "example": "Exemple issu des extraits"},\n'
-    '    {"meal": "Déjeuner", "example": "Exemple issu des extraits"},\n'
-    '    {"meal": "Goûter", "example": "Exemple issu des extraits"},\n'
-    '    {"meal": "Dîner", "example": "Exemple issu des extraits"}\n'
-    "  ],\n"
-    '  "source_ids": ["source_id_exact"]\n'
+    '  "intro": "...",\n'
+    '  "section_title": "Aliments adaptés à votre bilan",\n'
+    '  "highlights": [{"title": "...", "subtitle": "...", "image_key": "almonds_walnuts"}],\n'
+    '  "daily_meal_plan": [{"meal": "Petit-déjeuner", "example": "..."}],\n'
+    '  "source_ids": ["..."]\n'
     "}\n"
-    "Règles : utilise UNIQUEMENT des aliments et repères présents dans les extraits fournis, 4 highlights max, 4 repas, aucun chiffre non présent dans les extraits."
+    "Règles impératives :\n"
+    "- N'écris JAMAIS de texte générique ou de consigne recopiée.\n"
+    "- `highlights` doit contenir 4 à 5 aliments précis et simples (par exemple : Amandes, Noix, Graines de courge, Poissons, Céréales complètes, Fruits, Légumes), JAMAIS d'intitulé vague comme 'Fer héminique' ou 'Viandes, poissons, abats'.\n"
+    "- Clés `image_key` autorisées (chacune utilisée UNE SEULE FOIS maximum) : almonds_walnuts, walnuts, pumpkin_seeds, spinach, lentils_chickpeas, fish, fruits, whole_grains, vegetables.\n"
+    "- `daily_meal_plan` : propose 3 ou 4 repas (Petit-déjeuner, Déjeuner, Goûter, Dîner) issus uniquement des extraits, sans chiffre inventé."
 )
+
 
 ACTIONS_SYSTEM_PROMPT = (
     "Tu es un assistant pédagogique pour LabMind.\n"
-    "À partir de la synthèse du bilan et des extraits officiels fournis, réponds uniquement en JSON valide :\n"
-    '{"steps": ["5 à 6 actions concrètes et prudentes numérotées sans puce initiale, en français clair"], "questions": ["4 questions courtes se terminant par ? pour le médecin"]}\n'
-    "Règles : reste strictement non diagnostique, sans prescription ni dose chiffrée, cohérent avec le sens (bas/élevé/conforme) des paramètres."
+    "À partir du bilan et des extraits officiels fournis, réponds uniquement en JSON valide :\n"
+    "{\n"
+    '  "categories": {\n'
+    '    "nutrition": [],\n'
+    '    "physical_activity": [],\n'
+    '    "lifestyle_prevention": []\n'
+    "  },\n"
+    '  "steps": [],\n'
+    '  "questions": []\n'
+    "}\n"
+    "Règles impératives :\n"
+    "- Remplis chaque liste avec des phrases complètes, concrètes et rédigées pour le patient (JAMAIS de méta-instruction du style '1 à 3 repères...').\n"
+    "- `physical_activity` : 1 à 2 phrases d'activité physique adaptée et progressive.\n"
+    "- `lifestyle_prevention` : 1 à 2 phrases d'hygiène de vie (sommeil régulier, hydratation, arrêt du tabac, modération de l'alcool).\n"
+    "- `questions` : 4 questions polies, courtes et naturelles pour le médecin, ciblant uniquement les anomalies réelles du bilan.\n"
+    "- Aucune prescription, aucune dose chiffrée, aucun diagnostic."
 )
 
+
 QUESTIONS_SYSTEM_PROMPT = (
-    "Tu es un assistant pédagogique pour LabMind qui aide un patient à préparer "
-    "sa consultation médicale.\n"
+    "Tu es un assistant pédagogique pour LabMind qui aide un patient à préparer sa consultation médicale.\n"
     "Règles absolues :\n"
     "1. Réponds uniquement en JSON valide avec la clé "
-    '"questions" (liste de 4 questions courtes en français se terminant par \'?\').\n'
-    "2. Respecte strictement le sens indiqué pour chaque paramètre prioritaire :\n"
-    "   - Si un paramètre est noté VALEUR BASSE, la question porte uniquement sur une valeur basse (jamais sur une valeur élevée ni sur « réduire ») ;\n"
-    "   - Si un paramètre est noté VALEUR ÉLEVÉE, la question porte uniquement sur une valeur élevée ;\n"
-    "   - N'invente aucune anomalie sur les autres paramètres conformes.\n"
-    "3. Répartis les 4 questions entre :\n"
-    "   - 2 questions ciblées sur le ou les paramètres prioritaires (causes alimentaires ou médicales possibles, utilité d'un contrôle) ;\n"
-    "   - 2 questions générales sur l'interprétation globale du bilan, l'hygiène de vie ou le suivi.\n"
-    "4. Formule à la première personne en langage neutre (sans écrire « normale » ou « anormale », ni nom de médicament ou dose)."
+    "\"questions\" (liste de 4 questions courtes, polies et naturelles en français se terminant par \"?\").\n"
+    "2. Exemple de formulation attendue pour un paramètre légèrement bas : "
+    '"Mon taux de magnésium est légèrement inférieur à la normale. Est-il nécessaire de le contrôler ?", '
+    '"Quelles peuvent être les causes de cette diminution ?", '
+    '"Mon alimentation peut-elle influencer ce résultat ?", '
+    "\"Faut-il réaliser d'autres examens pour mieux comprendre cette anomalie ?\".\n"
+    "3. Respecte strictement le sens observé (bas vs élevé) et n'interroge pas sur des paramètres satisfaisants sauf suivi pertinent.\n"
+    "4. Évite les formulations alarmistes (« est-ce que je suis malade ? »), les répétitions, le jargon complexe et toute mention de médicament ou de dose."
 )
 
 GROUNDED_SUMMARY = (
@@ -176,11 +189,88 @@ _LIFESTYLE_NOISE_MARKERS = (
 
 _ALLOWED_IMAGE_KEYS = {
     "almonds_walnuts",
+    "walnuts",
     "pumpkin_seeds",
     "spinach",
     "lentils_chickpeas",
-    "balanced",
+    "fish",
+    "fruits",
+    "whole_grains",
+    "vegetables",
+    "neutral",
 }
+
+_FOOD_STEM_MAP: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("walnuts", ("cerneau", "noix de grenoble", "noix")),
+    ("almonds_walnuts", ("amand", "noisett", "oleagineu", "pistach")),
+    ("pumpkin_seeds", ("courge", "graine", "sesame", "tournesol", "lin")),
+    ("spinach", ("epinard", "bette", "feuille verte")),
+    ("lentils_chickpeas", ("lentill", "chiche", "haricot", "legumineus", "pois", "feve")),
+    ("fish", ("poisson", "saumon", "sardine", "maquereau", "hareng", "truite", "thon")),
+    ("fruits", ("fruit", "orange", "agrume", "pomme", "kiwi", "baie", "fraise", "banane", "citron")),
+    ("whole_grains", ("cereal", "complet", "avoine", "quinoa", "riz", "pain", "seigle", "ble")),
+    ("vegetables", ("legume", "brocoli", "carotte", "poivron", "courgette", "tomate")),
+)
+
+_NON_MAPPED_PRIMARY_FOOD_STEMS = (
+    "fer heminique",
+    "viande",
+    "abat",
+    "boudin",
+    "foie",
+    "oeuf",
+    "fromage",
+    "yaourt",
+    "lait",
+    "eau",
+)
+
+
+def _matches_stem_word(norm_text: str, stem: str) -> bool:
+    if " " in stem:
+        return stem in norm_text
+    return bool(re.search(rf"\b{re.escape(stem)}\w*", norm_text))
+
+
+def _resolve_food_image_key(
+    title: str,
+    subtitle: str,
+    raw_key: str,
+    used_keys: set[str],
+) -> str:
+    """Associe chaque aliment à une image distincte correspondant réellement à son nom."""
+    norm_title = _strip_accents(title)
+    norm_sub = _strip_accents(subtitle)
+
+    if any(_matches_stem_word(norm_title, stem) for stem in _NON_MAPPED_PRIMARY_FOOD_STEMS):
+        if not any(
+            _matches_stem_word(norm_title, fstem)
+            for _, fstems in _FOOD_STEM_MAP
+            for fstem in fstems
+        ):
+            return "neutral"
+
+    candidates: list[str] = []
+    for key, stems in _FOOD_STEM_MAP:
+        if any(_matches_stem_word(norm_title, stem) for stem in stems):
+            candidates.append(key)
+
+    if not candidates:
+        for key, stems in _FOOD_STEM_MAP:
+            if any(_matches_stem_word(norm_sub, stem) for stem in stems):
+                candidates.append(key)
+
+    cleaned_raw = raw_key.strip()
+    if cleaned_raw in _ALLOWED_IMAGE_KEYS and cleaned_raw not in ("balanced", "neutral"):
+        if not candidates:
+            candidates.append(cleaned_raw)
+
+    for candidate in candidates:
+        if candidate not in used_keys:
+            used_keys.add(candidate)
+            return candidate
+
+    return "neutral"
 
 
 def _strip_accents(text: str) -> str:
@@ -356,16 +446,33 @@ def build_parameter_prompt(
     )
     ref_str = _format_reference(parameter)
 
+    if parameter.status == ParameterStatus.within_reference:
+        statut_exact = "NORMAL (DANS LA NORME DU LABORATOIRE — ne pas évoquer d'anémie, de carence ou d'anomalie)"
+    elif parameter.status == ParameterStatus.below_reference:
+        statut_exact = "ANOMALIE : VALEUR BASSE (EN DESSOUS DU MINIMUM)"
+    elif parameter.status == ParameterStatus.above_reference:
+        statut_exact = "ANOMALIE : VALEUR ÉLEVÉE (AU-DESSUS DU MAXIMUM)"
+    else:
+        statut_exact = _describe_position(parameter).upper()
     lines = [
         "Paramètre biologique à expliquer :",
         f"- Code : {parameter.code}",
         f"- Nom imprimé : {parameter.name_printed}",
         f"- Valeur extraite : {val_str}",
         f"- Référence du laboratoire : {ref_str}",
+        f"- STATUT EXACT : {statut_exact}",
         f"- Position arithmétique : {_describe_position(parameter)}",
+    ]
+    if parameter.prior is not None:
+        lines.append(f"- Comparaison antérieure : {parameter.prior.note}")
+    if getattr(parameter, "marked_deviation", False):
+        lines.append(
+            "- Écart arithmétique marqué : oui (mentionner l'intérêt d'un avis médical rapide, sans diagnostic)"
+        )
+    lines.extend([
         "",
         "Extrait documentaire autorisé (cite uniquement son source_id) :",
-    ]
+    ])
 
     for idx, passage in enumerate(selected, start=1):
         lines.append(
@@ -623,33 +730,39 @@ def parse_llm_nutrition_plan(
     if not valid_ids:
         return None
 
-    intro = str(payload.get("intro") or "").strip()
-    section_title = str(payload.get("section_title") or "").strip()
+    raw_intro = str(payload.get("intro") or "").strip()
+    intro = "" if (raw_intro and is_placeholder_text(raw_intro)) else raw_intro
+    raw_sec_title = str(payload.get("section_title") or "").strip()
+    section_title = "" if (raw_sec_title and is_placeholder_text(raw_sec_title)) else raw_sec_title
     highlights: list[NutritionHighlight] = []
+    used_image_keys: set[str] = set()
     for raw_h in (payload.get("highlights") or []):
         if not isinstance(raw_h, dict):
             continue
         title = str(raw_h.get("title") or "").strip()
         subtitle = str(raw_h.get("subtitle") or "").strip()
-        img_key = str(raw_h.get("image_key") or "balanced").strip()
-        if img_key not in _ALLOWED_IMAGE_KEYS:
-            img_key = "balanced"
-        if title and subtitle:
-            highlights.append(NutritionHighlight(title=title, subtitle=subtitle, image_key=img_key))
-        if len(highlights) >= 4:
+        raw_img_key = str(raw_h.get("image_key") or "neutral").strip()
+        if not title or not subtitle:
+            continue
+        if is_placeholder_text(title) or is_placeholder_text(subtitle):
+            continue
+        img_key = _resolve_food_image_key(title, subtitle, raw_img_key, used_image_keys)
+        highlights.append(NutritionHighlight(title=title, subtitle=subtitle, image_key=img_key))
+        if len(highlights) >= 5:
             break
-
     meal_rows: list[MealPlanRow] = []
     for raw_m in (payload.get("daily_meal_plan") or []):
         if not isinstance(raw_m, dict):
             continue
         meal = str(raw_m.get("meal") or "").strip()
         example = str(raw_m.get("example") or "").strip()
-        if meal and example:
-            meal_rows.append(MealPlanRow(meal=meal, example=example))
+        if not meal or not example:
+            continue
+        if is_placeholder_text(meal) or is_placeholder_text(example):
+            continue
+        meal_rows.append(MealPlanRow(meal=meal, example=example))
         if len(meal_rows) >= 5:
             break
-
     if not intro and not highlights and not meal_rows:
         return None
 
@@ -690,6 +803,7 @@ class RagExplanationGenerator:
         questions_system_prompt: str = QUESTIONS_SYSTEM_PROMPT,
         min_overlap_ratio: float = 0.18,
         max_retries: int = 1,
+        include_extended_sections: bool = False,
     ) -> None:
         self.llm_client = llm_client
         self.system_prompt = system_prompt
@@ -697,6 +811,7 @@ class RagExplanationGenerator:
         self.questions_system_prompt = questions_system_prompt
         self.min_overlap_ratio = min_overlap_ratio
         self.max_retries = max_retries
+        self.include_extended_sections = include_extended_sections
         self._fallback = InsufficientSourcesGenerator()
         self._supports_max_tokens = self._check_supports_max_tokens(llm_client)
 
@@ -733,7 +848,8 @@ class RagExplanationGenerator:
 
         for attempt in range(self.max_retries + 1):
             try:
-                raw_response = self._invoke_llm(self.system_prompt, prompt, max_tokens=320)
+                max_tok = 180 if parameter.status == ParameterStatus.within_reference else 240
+                raw_response = self._invoke_llm(self.system_prompt, prompt, max_tokens=max_tok)
             except LocalLLMError:
                 return build_unavailable_explanation(parameter)
 
@@ -841,20 +957,20 @@ class RagExplanationGenerator:
         self,
         parameters: list[ParameterResult],
         passages: list[RetrievedPassage],
-    ) -> tuple[list[str], list[str]]:
+    ) -> tuple[GuidanceSections | None, list[str], list[str]]:
         active_parameters = [
             param
             for param in parameters
             if param.status != ParameterStatus.not_analyzed
         ]
         if not active_parameters:
-            return [], []
+            return None, [], []
 
         prompt = build_questions_prompt(active_parameters, passages)
         if passages:
             snippets = "\n".join(
-                f"- [{p.source.source_id}] {p.excerpt[:280]}"
-                for p in passages[:3]
+                f"- [{p.source.source_id}] {p.excerpt[:300]}"
+                for p in passages[:4]
             )
             prompt = f"{prompt}\n\nExtraits officiels de contexte :\n{snippets}"
 
@@ -862,17 +978,37 @@ class RagExplanationGenerator:
             raw_response = self._invoke_llm(
                 ACTIONS_SYSTEM_PROMPT,
                 prompt,
-                max_tokens=650,
+                max_tokens=780,
             )
         except LocalLLMError:
-            return [], []
+            return None, [], []
 
         payload = _extract_json_object(raw_response)
         if payload is None:
-            return [], []
+            return None, [], []
+
+        raw_cats = payload.get("categories")
+        guidance: GuidanceSections | None = None
+        if isinstance(raw_cats, dict):
+            nutrition = sanitize_action_steps(raw_cats.get("nutrition") or [], max_steps=4) if isinstance(raw_cats.get("nutrition"), list) else []
+            physical = sanitize_action_steps(raw_cats.get("physical_activity") or [], max_steps=4) if isinstance(raw_cats.get("physical_activity"), list) else []
+            lifestyle_prev = sanitize_action_steps(raw_cats.get("lifestyle_prevention") or [], max_steps=4) if isinstance(raw_cats.get("lifestyle_prevention"), list) else []
+            followup = sanitize_action_steps(raw_cats.get("medical_followup") or [], max_steps=4) if isinstance(raw_cats.get("medical_followup"), list) else []
+            if nutrition or physical or lifestyle_prev or followup:
+                guidance = GuidanceSections(
+                    nutrition=nutrition,
+                    physical_activity=physical,
+                    lifestyle_prevention=lifestyle_prev,
+                    medical_followup=followup,
+                )
 
         raw_steps = payload.get("steps")
         steps = sanitize_action_steps(raw_steps) if isinstance(raw_steps, list) else []
+        if not steps and guidance is not None:
+            steps = sanitize_action_steps(
+                [*guidance.medical_followup, *guidance.nutrition, *guidance.physical_activity, *guidance.lifestyle_prevention],
+                max_steps=6,
+            )
 
         raw_questions = payload.get("questions")
         questions = (
@@ -881,7 +1017,7 @@ class RagExplanationGenerator:
             else []
         )
         questions = _filter_contradictory_questions(questions, active_parameters)
-        return steps, questions
+        return guidance, steps, questions
 
     def _generate_consultation_questions(
         self,
@@ -908,6 +1044,53 @@ class RagExplanationGenerator:
 
         sanitized = parse_llm_questions(raw_response)
         return _filter_contradictory_questions(sanitized, active_parameters)
+
+    def _build_general_summary(
+        self,
+        parameters: list[ParameterResult],
+    ) -> str:
+        """Construit une synthèse générale courte et neutre du bilan (sans diagnostic)."""
+        analyzed = [p for p in parameters if p.status != ParameterStatus.not_analyzed]
+        within = [p for p in analyzed if p.status == ParameterStatus.within_reference]
+        out = [
+            p
+            for p in analyzed
+            if p.status in (ParameterStatus.below_reference, ParameterStatus.above_reference)
+        ]
+        marked = [p for p in out if getattr(p, "marked_deviation", False)]
+        parts: list[str] = []
+        if within and not out:
+            parts.append(
+                f"Les {len(within)} paramètre(s) analysé(s) avec intervalle de référence se situent dans les normes du laboratoire."
+            )
+            parts.append(
+                "Ce résultat global est rassurant et pourra être partagé lors de votre prochain suivi médical."
+            )
+        elif out:
+            if within:
+                parts.append(
+                    f"Sur {len(analyzed)} paramètre(s) analysé(s), {len(within)} se situent dans les normes du laboratoire."
+                )
+            out_labels = ", ".join(
+                f"{p.name_printed} ({'en dessous' if p.status == ParameterStatus.below_reference else 'au-dessus'})"
+                for p in out[:4]
+            )
+            if len(out) > 4:
+                out_labels += f" et {len(out) - 4} autre(s)"
+            parts.append(f"Écart(s) relevé(s) par rapport aux bornes du laboratoire : {out_labels}.")
+            if marked:
+                parts.append(
+                    "Un écart arithmétique marqué est présent : un avis médical rapide est recommandé."
+                )
+            else:
+                parts.append(
+                    "Un échange avec votre médecin permettra d'interpréter ces éléments selon votre contexte clinique."
+                )
+        elif analyzed:
+            parts.append(
+                f"{len(analyzed)} paramètre(s) ont été extraits, mais certaines bornes de référence ne figurent pas sur le document."
+            )
+        return " ".join(parts)
 
     def _build_section_summaries(
         self,
@@ -966,6 +1149,8 @@ class RagExplanationGenerator:
         used_sources: dict[str, Source] = {}
 
         for parameter in request.parameters:
+            if parameter.code.startswith("RAW_"):
+                continue
             if parameter.status == ParameterStatus.not_analyzed or not request.passages:
                 explanations.append(build_unavailable_explanation(parameter))
                 continue
@@ -986,7 +1171,7 @@ class RagExplanationGenerator:
             for sid in lifestyle_info.source_ids:
                 if sid not in used_sources:
                     used_sources[sid] = sources_by_id[sid]
-            if request.include_consultation_questions:
+            if request.include_consultation_questions and self.include_extended_sections:
                 nutrition_plan = self._generate_nutrition_plan(
                     request.parameters, request.lifestyle_passages
                 )
@@ -999,13 +1184,15 @@ class RagExplanationGenerator:
         else:
             lifestyle_info = None
 
+        guidance_sections: GuidanceSections | None = None
         action_steps: list[str] = []
         consultation_questions: list[str] = []
         if request.include_consultation_questions:
             combined_passages = [*request.passages, *request.lifestyle_passages]
-            action_steps, consultation_questions = self._generate_actions_and_questions(
-                request.parameters, combined_passages
-            )
+            if self.include_extended_sections:
+                guidance_sections, action_steps, consultation_questions = self._generate_actions_and_questions(
+                    request.parameters, combined_passages
+                )
             if not consultation_questions:
                 consultation_questions = self._generate_consultation_questions(
                     request.parameters, combined_passages
@@ -1015,6 +1202,11 @@ class RagExplanationGenerator:
             self._build_section_summaries(request.parameters, explanations)
             if request.include_consultation_questions
             else []
+        )
+        general_summary = (
+            self._build_general_summary(request.parameters)
+            if request.include_consultation_questions
+            else None
         )
 
         has_grounded = any(
@@ -1027,10 +1219,12 @@ class RagExplanationGenerator:
 
         return GenerationResult(
             summary=summary,
+            general_summary=general_summary,
             parameter_explanations=explanations,
             section_summaries=section_summaries,
             lifestyle_info=lifestyle_info,
             nutrition_plan=nutrition_plan,
+            guidance_sections=guidance_sections,
             action_steps=action_steps,
             consultation_questions=consultation_questions,
             sources=list(used_sources.values()),

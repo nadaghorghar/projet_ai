@@ -1,0 +1,25 @@
+{
+  "doc_id": "eval_05_prior_comparison",
+  "filename": "eval_05_prior_comparison.pdf",
+  "source_type": "synthetic_varied",
+  "parameters": [
+    {
+      "code": "HGB",
+      "value": 13.3,
+      "unit": "g/dL",
+      "reference_min": 12.0,
+      "reference_max": 15.5,
+      "prior_value": 12.5,
+      "prior_date": "10/01/2026"
+    },
+    {
+      "code": "HBA1C",
+      "value": 7.1,
+      "unit": "%",
+      "reference_min": 4.0,
+      "reference_max": 6.0,
+      "prior_value": 6.8,
+      "prior_date": "15/12/2025"
+    }
+  ]
+}

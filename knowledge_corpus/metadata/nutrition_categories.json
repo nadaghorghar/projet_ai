@@ -1,0 +1,192 @@
+{
+  "version": "1.0",
+  "intro": "Découvrez une sélection d'aliments et des informations nutritionnelles en lien avec les observations de votre bilan biologique.",
+  "source_ids": [
+    "anses-reperes-nutritionnels-2017",
+    "ameli-alimentation-adulte-2026",
+    "anses-vitamines-mineraux-2021",
+    "oms-has-nutrition-suivi-2025"
+  ],
+  "categories": [
+    {
+      "id": "fruits",
+      "title": "Fruits",
+      "image_key": "fruits",
+      "image_path": "assets/foods/fruits.jpg",
+      "summary": "Apport naturel en fibres, vitamines et antioxydants dans le cadre d'une alimentation variée.",
+      "relevant_categories": ["Bilan glycémique", "Bilan lipidique", "NFS", "Bilan martial", "Bilan minéral"],
+      "items": [
+        {
+          "name": "Pomme",
+          "explanation": "Fruit riche en fibres solubles (pectines) qui participent au confort digestif et à la satiété."
+        },
+        {
+          "name": "Orange",
+          "explanation": "Source naturelle de vitamine C et d'eau, utile pour varier les apports quotidiens en fruits frais."
+        },
+        {
+          "name": "Fraise",
+          "explanation": "Fruit peu énergétique apportant vitamine C, folates et composés antioxydants."
+        },
+        {
+          "name": "Kiwi",
+          "explanation": "Riche en vitamine C et en fibres alimentaires, intéressant au petit-déjeuner ou en collation."
+        },
+        {
+          "name": "Poire",
+          "explanation": "Apporte des fibres douces et de l'eau tout en contribuant aux repères quotidiens de fruits."
+        }
+      ]
+    },
+    {
+      "id": "vegetables",
+      "title": "Légumes",
+      "image_key": "vegetables",
+      "image_path": "assets/foods/vegetables.jpg",
+      "summary": "Base essentielle des repas pour l'équilibre en fibres, folates, potassium et minéraux.",
+      "relevant_categories": ["NFS", "Bilan glycémique", "Bilan lipidique", "Bilan hépatique", "Bilan minéral", "Bilan rénal"],
+      "items": [
+        {
+          "name": "Brocoli",
+          "explanation": "Légume vert apportant fibres, vitamine C et vitamines du groupe B."
+        },
+        {
+          "name": "Carotte",
+          "explanation": "Source de bêta-carotène et de fibres douces, facile à intégrer crue ou cuite."
+        },
+        {
+          "name": "Épinards",
+          "explanation": "Légume à feuilles vertes fournissant folates (vitamine B9), magnésium et fibres."
+        },
+        {
+          "name": "Courgette",
+          "explanation": "Légume riche en eau et minéraux, léger et adapté aux repas du soir."
+        },
+        {
+          "name": "Tomate",
+          "explanation": "Apporte hydratation, potassium et lycopène dans les préparations crues ou cuisinées."
+        }
+      ]
+    },
+    {
+      "id": "proteins",
+      "title": "Sources de protéines",
+      "image_key": "proteins",
+      "image_path": "assets/foods/proteins.jpg",
+      "summary": "Protéines animales et végétales variées pour le renouvellement cellulaire et l'équilibre des repas.",
+      "relevant_categories": ["NFS", "Bilan martial", "Bilan lipidique", "Bilan rénal"],
+      "items": [
+        {
+          "name": "Poisson",
+          "explanation": "Source de protéines complètes ; les poissons gras apportent également des acides gras oméga-3."
+        },
+        {
+          "name": "Œufs",
+          "explanation": "Apport protéique complet accompagné de vitamines B12 et D et de minéraux."
+        },
+        {
+          "name": "Poulet",
+          "explanation": "Viande maigre fournissant des protéines de bonne qualité biologique avec peu de graisses saturées."
+        },
+        {
+          "name": "Lentilles",
+          "explanation": "Légumineuse riche en protéines végétales, fibres, fer non héminique et magnésium."
+        },
+        {
+          "name": "Pois chiches",
+          "explanation": "Source végétale de protéines, fibres et minéraux contribuant à la diversité alimentaire."
+        }
+      ]
+    },
+    {
+      "id": "grains_legumes",
+      "title": "Céréales et légumineuses",
+      "image_key": "grains_legumes",
+      "image_path": "assets/foods/grains_legumes.jpg",
+      "summary": "Glucides complexes à index glycémique modéré, fibres et minéraux (magnésium, fer, zinc).",
+      "relevant_categories": ["Bilan glycémique", "Bilan lipidique", "Bilan minéral", "Bilan martial"],
+      "items": [
+        {
+          "name": "Flocons d'avoine",
+          "explanation": "Céréale complète riche en fibres solubles (bêta-glucanes) et en glucides à libération progressive."
+        },
+        {
+          "name": "Riz complet",
+          "explanation": "Céréale peu raffinée conservant ses fibres et une partie des minéraux du grain."
+        },
+        {
+          "name": "Quinoa",
+          "explanation": "Graine complète apportant protéines végétales, fibres, fer et magnésium."
+        },
+        {
+          "name": "Haricots",
+          "explanation": "Légumineuses riches en fibres, potassium, magnésium et protéines végétales."
+        },
+        {
+          "name": "Pois cassés",
+          "explanation": "Source économique de fibres, glucides complexes et folates pour varier les accompagnements."
+        }
+      ]
+    },
+    {
+      "id": "dairy_alternatives",
+      "title": "Produits laitiers et alternatives",
+      "image_key": "dairy_alternatives",
+      "image_path": "assets/foods/dairy_alternatives.jpg",
+      "summary": "Apports usuels en calcium et protéines, avec options végétales enrichies selon les tolérances.",
+      "relevant_categories": ["Bilan minéral", "Bilan glycémique", "Bilan lipidique"],
+      "items": [
+        {
+          "name": "Yaourt nature",
+          "explanation": "Produit laitier fermenté apportant calcium, protéines et ferments lactiques sans sucres ajoutés."
+        },
+        {
+          "name": "Lait",
+          "explanation": "Source classique de calcium biodisponible, protéines et vitamine B2."
+        },
+        {
+          "name": "Fromage blanc",
+          "explanation": "Laitage frais riche en protéines et en calcium, modulable avec des fruits frais."
+        },
+        {
+          "name": "Boisson au soja enrichie",
+          "explanation": "Alternative végétale sans lactose apportant protéines végétales et calcium lorsqu'elle est enrichie."
+        },
+        {
+          "name": "Kéfir",
+          "explanation": "Boisson lactée fermentée contribuant aux apports en calcium et en micro-organismes fermentaires."
+        }
+      ]
+    },
+    {
+      "id": "nuts_dried_fruits",
+      "title": "Fruits secs et oléagineux",
+      "image_key": "nuts_dried_fruits",
+      "image_path": "assets/foods/nuts_dried_fruits.jpg",
+      "summary": "Poignée quotidienne non salée et sans sucres ajoutés, riche en magnésium et acides gras insaturés.",
+      "relevant_categories": ["Bilan minéral", "Bilan lipidique", "Bilan martial", "NFS"],
+      "items": [
+        {
+          "name": "Amandes",
+          "explanation": "Oléagineux non salés naturellement riches en magnésium, vitamine E et fibres."
+        },
+        {
+          "name": "Noix",
+          "explanation": "Source végétale d'acides gras oméga-3 (ALA) et de minéraux."
+        },
+        {
+          "name": "Noisettes",
+          "explanation": "Apportent graisses insaturées, vitamine E et magnésium en petite portion nature."
+        },
+        {
+          "name": "Pistaches non salées",
+          "explanation": "Oléagineux contenant fibres, potassium et antioxydants lorsqu'ils sont choisis non salés."
+        },
+        {
+          "name": "Dattes",
+          "explanation": "Fruits séchés apportant fibres, potassium et énergie naturelle, à consommer en quantité modérée sans sucres ajoutés."
+        }
+      ]
+    }
+  ]
+}

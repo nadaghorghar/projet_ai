@@ -1,0 +1,9 @@
+TITRE : Standards of Care in Diabetes — Repères glycémiques et suivi biologique (ADA)
+ORGANISME : American Diabetes Association (ADA)
+URL : https://diabetesjournals.org/care
+CONDITIONS : Synthèse pédagogique fidèle des repères publics ADA pour l'information du patient.
+
+- L'hémoglobine glyquée (HbA1c) reflète la glycémie moyenne sur environ 2 à 3 mois et complète la glycémie à jeun lors du suivi métabolique.
+- Une glycémie ou HbA1c isolée au-dessus de l'intervalle de référence nécessite généralement une confirmation biologique avant toute conclusion médicale.
+- Certaines situations (anémie, variation des globules rouges, grossesse, insuffisance rénale) peuvent modifier l'interprétation de l'HbA1c et justifier un avis médical.
+- Les cibles biologiques sont toujours individualisées par le médecin selon l'âge, les antécédents et les traitements en cours.

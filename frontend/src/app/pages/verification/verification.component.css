@@ -1,7 +1,7 @@
 .question-text {
   font-size: 1rem;
   color: var(--texte);
-  margin: 8px 0 18px;
+  margin: 8px 0 20px;
 }
 
 .pill-options {
@@ -11,54 +11,56 @@
 }
 
 .option-pill {
-  border: 1px solid var(--bordure);
+  border: 1px solid var(--bordure-forte);
   background: var(--surface-alt);
   color: var(--texte);
   font-family: inherit;
   font-size: 0.92rem;
   font-weight: 600;
   padding: 10px 18px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
 }
 
 .option-pill:hover:not(:disabled),
 .option-pill.active {
-  background: var(--indigo);
-  border-color: var(--indigo);
-  color: #0b111a;
+  background: var(--violet-principal);
+  border-color: var(--violet-principal);
+  color: #FFFFFF;
 }
 
 .option-pill.neutral {
   color: var(--texte-secondaire);
+  background: var(--gris-clair);
 }
 
 .option-pill.neutral:hover:not(:disabled) {
-  background: #1e293b;
-  color: var(--texte);
+  background: var(--lavande);
+  color: var(--violet-principal);
 }
 
 .custom-row {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .custom-row input {
   flex: 1;
   padding: 11px 16px;
-  background: var(--surface-alt);
+  background: var(--surface);
   color: var(--texte);
-  border: 1px solid var(--bordure);
-  border-radius: 10px;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 12px;
   font-family: inherit;
   font-size: 0.94rem;
 }
 
 .custom-row input:focus {
   outline: none;
-  border-color: var(--indigo);
+  border-color: var(--violet-principal);
+  box-shadow: 0 0 0 3px var(--lavande);
 }
 
 @media (max-width: 520px) {

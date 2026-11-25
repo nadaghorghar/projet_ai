@@ -114,7 +114,7 @@ def build_orchestrator_factory(
     """Construit la fabrique d'AgentOrchestrator pour l'API."""
     knowledge_index = _load_knowledge_index(index_dir, embedder=embedder) if enable_rag else None
     generator = (
-        RagExplanationGenerator(llm_client=llm_client or OllamaLLMClient())
+        RagExplanationGenerator(llm_client=llm_client or OllamaLLMClient(), include_extended_sections=True)
         if knowledge_index is not None
         else None
     )

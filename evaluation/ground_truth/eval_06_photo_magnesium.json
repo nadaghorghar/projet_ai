@@ -1,0 +1,63 @@
+{
+  "doc_id": "eval_06_photo_magnesium",
+  "filename": "eval_06_photo_magnesium.jpg",
+  "source_type": "synthetic_ocr_photo",
+  "parameters": [
+    {
+      "code": "RBC",
+      "value": 4.5,
+      "unit": "10^6/mm3",
+      "reference_min": 3.8,
+      "reference_max": 5.5
+    },
+    {
+      "code": "HGB",
+      "value": 13.3,
+      "unit": "g/dL",
+      "reference_min": 12.0,
+      "reference_max": 15.5
+    },
+    {
+      "code": "HCT",
+      "value": 38.9,
+      "unit": "%",
+      "reference_min": 36.0,
+      "reference_max": 46.0
+    },
+    {
+      "code": "WBC",
+      "value": 6870.0,
+      "unit": "/mm3",
+      "reference_min": 4000.0,
+      "reference_max": 10000.0
+    },
+    {
+      "code": "PLT",
+      "value": 228000.0,
+      "unit": "/mm3",
+      "reference_min": 150000.0,
+      "reference_max": 450000.0
+    },
+    {
+      "code": "CREAT",
+      "value": 66.98,
+      "unit": "µmol/L",
+      "reference_min": 44.0,
+      "reference_max": 97.0
+    },
+    {
+      "code": "CA",
+      "value": 89.0,
+      "unit": "mg/L",
+      "reference_min": 88.0,
+      "reference_max": 108.0
+    },
+    {
+      "code": "MG",
+      "value": 17.39,
+      "unit": "mg/L",
+      "reference_min": 18.0,
+      "reference_max": 26.0
+    }
+  ]
+}

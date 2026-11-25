@@ -8,9 +8,10 @@ import unicodedata
 from .catalog import ACCEPTED_UNITS, ALIASES, KNOWN_UNITS
 
 SIMPLE_NUM = r"\d+(?:[.,]\d+)?"
-NUM = r"\d{1,3}(?:\s\d{3})+(?:[.,]\d+)?|\d+(?:[.,]\d+)?"
+NUM = r"(?<!\d)\d{1,3}\s\d{3}(?![.,\d])|\d+(?:[.,]\d+)?"
 PAREN_RANGE_RE = re.compile(rf"\(\s*({NUM})\s*[-–—~]\s*({NUM})\s*\)")
 RANGE_RE = re.compile(rf"({NUM})(?:\s*[-–—~]\s*|\s+[àa]\s+)({NUM})")
+SIMPLE_RANGE_RE = re.compile(rf"({SIMPLE_NUM})(?:\s*[-–—~]\s*|\s+[àa]\s+)({SIMPLE_NUM})")
 UPPER_BOUND_RE = re.compile(
     rf"\(?\s*(?:réf\.?\s*:?\s*)?(?:<=?|[il]?nf[ée]rieur[e]?\s+[àa])\s*({NUM})"
     rf"(?:\s*[a-zA-Zµμ/%0-9^.,²³]+)?\s*\)?",
@@ -24,7 +25,10 @@ LOWER_BOUND_RE = re.compile(
 NUM_RE = re.compile(NUM)
 LEADER_RE = re.compile(r"(?:\.\s*){2,}|[_\u2026]{1,}|-{3,}|(?:\s*[.,·•'‘’\"`~-]\s*){3,}")
 PRIOR_DATE_RE = re.compile(
-    rf"(?:{NUM})\s*\(\s*\d{{1,2}}/\d{{1,2}}/\d{{2,4}}\s*\)"
+    rf"(?:(?:ant[ée]r(?:iorit[ée])?|pr[ée]c(?:[ée]d(?:ent)?)?)\s*:?\s*)?"
+    rf"({NUM})(?:\s*([a-zA-Zµμ/%][a-zA-Zµμ/%0-9^.,²³]*))?\s*"
+    rf"\(\s*(\d{{1,2}}/\d{{1,2}}/\d{{2,4}})\s*\)",
+    re.I,
 )
 UNIT_NUMBER_TOKEN_RE = re.compile(
     r"10\s*\^\s*[36]\s*/\s*[µμu]?l|1[.,]73\s*m(?:\s*\^\s*2|²)",
@@ -75,6 +79,11 @@ def _norm(s: str) -> str:
     return "".join(c for c in s if unicodedata.category(c) != "Mn")
 
 
+def _normalize_ocr_decimals(text: str) -> str:
+    """Reconstitue les nombres décimaux scindés par des espaces OCR (ex. '3 , 8' -> '3,8') sans altérer les milliers."""
+    return re.sub(r"(\d)\s*([.,])\s*(\d)", r"\1\2\3", text)
+
+
 def _dedup_faux_bold(line: str) -> str:
     """Corrige les mots doublés lettre à lettre en faux gras PDF (ex. 'GGllyyccéémmiiee àà jjeeûûnn..')."""
     tokens = re.split(r"(\s+)", line)
@@ -108,6 +117,16 @@ _ALIAS_LIST = sorted(
     ((_norm(a), code) for code, al in ALIASES.items() for a in al),
     key=lambda x: -len(x[0]),
 )
+_SPLIT_ALIAS_PATTERNS = [
+    re.escape(a)
+    for _, al in ALIASES.items()
+    for a in al
+    if len(_norm(a)) >= 5
+]
+_SECONDARY_PARAM_RE = re.compile(
+    r"(?<=\s)(?=" + "|".join(sorted(_SPLIT_ALIAS_PATTERNS, key=len, reverse=True)) + r")(?=[\wÀ-ÿ]+(?:\s|:|\.))",
+    re.I,
+)
 _KNOWN_UNITS_SET = set(KNOWN_UNITS)
 
 
@@ -125,6 +144,8 @@ def normalize_unit(u: str | None) -> str | None:
         return None
 
     low = u.lower().replace("µ", "u").replace(",", ".")
+    if low in ("%", "yo", "°/o", "o/o", "°%", "%o", "9/0"):
+        return "%"
     if re.match(r"^ml/min/1\.73m(?:\^?2|²)$", low):
         return "mL/min/1.73m²"
     if re.match(r"^millions?/mm[3³°\*\?'’®s]?$", low) or low in (
@@ -138,7 +159,9 @@ def normalize_unit(u: str | None) -> str | None:
         or low in ("fram®", "fram", "/°", "imm3", "lmm3", "/mm")
     ):
         return "/mm³"
-    if low in ("g/d!", "g/d1", "glal", "g/di", "g/dl"):
+    if low in ("pg", "pq", "p9", "p.g"):
+        return "pg"
+    if low in ("g/d!", "g/d1", "glal", "g/di", "g/dl", "g/cl", "g/ol", "gid", "gldl"):
         return "g/dL"
     if low in ("urmol/l", "umo1/l", "umo1/1", "umol/1", "umol/i", "pmol/l", "ymol/l", "pmol/1"):
         return "µmol/L"
@@ -153,7 +176,11 @@ def normalize_unit(u: str | None) -> str | None:
     if m:
         return f"10^{m.group(1)}/µL"
 
-    cand = difflib.get_close_matches(low, list(exact), n=1, cutoff=0.75)
+    # Préserve les unités médicales valides non cataloguées (mUI/L, pg/mL, mEq/L, etc.)
+    if re.match(r"^[a-zµ]+(?:/[a-z0-9²³µ]+)+$", low):
+        return u
+
+    cand = difflib.get_close_matches(low, list(exact), n=1, cutoff=0.78)
     return exact[cand[0]] if cand else u
 
 
@@ -202,7 +229,7 @@ def _match_alias_with_mode(line: str) -> tuple[str | None, str | None, bool]:
         if not candidate_source:
             continue
         label_part = re.split(
-            r"\s{2,}|(?:\.\s*){2,}|_|\u2026|\d", candidate_source, maxsplit=1
+            r"\s{2,}|(?:\.\s*){2,}|\s+[.,:]|_|\u2026|\d", candidate_source, maxsplit=1
         )[0].strip(" .,:;|")
         norm_label = _norm(label_part)
         if len(norm_label) < 4:
@@ -213,13 +240,15 @@ def _match_alias_with_mode(line: str) -> tuple[str | None, str | None, bool]:
         for alias, al_code in _ALIAS_LIST:
             if len(alias) < 4:
                 continue
-            if abs(len(norm_label) - len(alias)) > 3:
+            max_len_diff = 4 if len(alias) >= 7 else 3
+            if abs(len(norm_label) - len(alias)) > max_len_diff:
                 continue
             ratio = difflib.SequenceMatcher(None, norm_label, alias).ratio()
             if ratio > best_score:
                 best_score = ratio
                 best_code = al_code
-        if best_code is not None and best_score >= 0.76:
+        min_ratio = 0.74 if len(norm_label) >= 4 else 0.80
+        if best_code is not None and best_score >= min_ratio:
             return best_code, label_part, True
 
     return None, None, False
@@ -298,25 +327,36 @@ def _pick_value_and_unit(
     return value, unit
 
 
-def parse_line(line: str) -> dict | None:
-    deduped = _dedup_faux_bold(line)
-    cleaned = LEADER_RE.sub(" ", deduped)
-    cleaned = re.sub(r"\bMillions\s*/\s*mm[3³°\*\?'’®s]?", "Millions/mm³", cleaned, flags=re.I)
-    cleaned = re.sub(r"\s*/\s*mm[3³°\*\?'’®s]?", " /mm³", cleaned, flags=re.I)
-    code, raw_alias, is_fuzzy = _match_alias_with_mode(cleaned)
-    if code is None or raw_alias is None:
-        return None
+_METADATA_IGNORE_RE = re.compile(
+    r"\b(?:compte\s+rendu|patient|dossier|n[ée]\(?e\)?\s+le|pvt\s+du|pr[ée]l[èe]vement|"
+    r"demand[ée]\s+par|docteur|laboratoire|biologiste|valeurs?\s+usuelles?|"
+    r"r[ée]sultats?\s+d['’]analyses?|page\s*:?\s*\d|t[ée]l\.?|fax|email|"
+    r"h[ée]mogramme|formule\s+leucocytaire|analyses?\s+d[e']|sp[ée]cialiste|"
+    r"remercions|r[ée]tablissement|adresse|avenue|boulevard|rue|code\s+patient)\b",
+    re.I,
+)
+_RAW_UNIT_HINT_RE = re.compile(
+    r"^(?:[a-zµμ%]+(?:/[a-z0-9²³µμ]+)*|UI/L|mUI/L|U/L|U/mL|UI/mL|mEq/L|ng/mL|pg/mL|"
+    r"pmol/L|nmol/L|µmol/L|mmol/L|mg/L|mg/dL|g/L|g/dL|µg/L|µg/dL|fL|pg|%|/mm³|Millions/mm³)$",
+    re.I,
+)
 
-    idx = cleaned.find(raw_alias)
-    rest = cleaned[idx + len(raw_alias) :].lstrip(" .,:;|") if idx >= 0 else cleaned
 
-    while True:
-        dup_code, dup_alias = _exact_match_alias(rest)
-        if dup_code == code and dup_alias is not None:
-            rest = rest.lstrip()[len(dup_alias) :].lstrip(" .,:;|")
-        else:
-            break
+def _make_raw_code(label: str) -> str:
+    slug = re.sub(r"[^A-Z0-9]+", "_", _norm(label).upper()).strip("_")
+    return f"RAW_{(slug or 'PARAM')[:40]}"
 
+
+def _extract_prior_and_refs(rest: str) -> tuple[str, float | None, str | None, str | None, float | None, float | None, str]:
+    prior_value: float | None = None
+    prior_unit: str | None = None
+    prior_date: str | None = None
+    m_prior = PRIOR_DATE_RE.search(rest)
+    if m_prior:
+        prior_value = to_float(m_prior.group(1))
+        raw_prior_unit = m_prior.group(2)
+        prior_unit = normalize_unit(raw_prior_unit) if raw_prior_unit else None
+        prior_date = m_prior.group(3)
     rest = PRIOR_DATE_RE.sub(" ", rest)
 
     ref_min = ref_max = None
@@ -330,9 +370,15 @@ def parse_line(line: str) -> dict | None:
     else:
         m = RANGE_RE.search(rest)
         if m:
+            candidate_rest = rest[: m.start()] + " " + rest[m.end() :]
+            if " " in m.group(2) and not NUM_RE.search(UNIT_NUMBER_TOKEN_RE.sub(" ", candidate_rest)):
+                m_simple = SIMPLE_RANGE_RE.search(rest)
+                if m_simple:
+                    m = m_simple
+                    candidate_rest = rest[: m.start()] + " " + rest[m.end() :]
             ref_min, ref_max = to_float(m.group(1)), to_float(m.group(2))
             ref_raw = m.group(0)
-            rest = rest[: m.start()] + " " + rest[m.end() :]
+            rest = candidate_rest
         else:
             m_upper = UPPER_BOUND_RE.search(rest)
             if m_upper:
@@ -351,13 +397,97 @@ def parse_line(line: str) -> dict | None:
 
     rest = re.sub(r"\(\s*réf\.?\s*:?\s*", " ", rest, flags=re.I)
     rest = re.sub(r"[()]", " ", rest)
+    return rest, prior_value, prior_unit, prior_date, ref_min, ref_max, ref_raw
+
+
+def _parse_unrecognized_line(line: str, cleaned: str) -> dict | None:
+    """Extrait un paramètre biologique non présent dans le catalogue pour l'afficher dans le tableau."""
+    if not cleaned or len(cleaned) > 180:
+        return None
+    if "@" in cleaned or "http" in cleaned.lower():
+        return None
+    if re.search(r"\b\d{1,2}/\d{1,2}/\d{2,4}\b", cleaned) and not PRIOR_DATE_RE.search(cleaned):
+        return None
+    if _METADATA_IGNORE_RE.search(_norm(cleaned)):
+        return None
+
+    m_split = re.search(r"\s+(?=\d+(?:[.,]\d+)?(?:\s|$))", cleaned)
+    if not m_split:
+        return None
+
+    raw_label = cleaned[: m_split.start()].strip(" .,:;|_-•·…")
+    rest = cleaned[m_split.end() :].strip()
+    if len(raw_label) < 2 or len(raw_label) > 70:
+        return None
+    if not any(ch.isalpha() for ch in raw_label):
+        return None
+    if raw_label[0].isdigit():
+        return None
+    if _METADATA_IGNORE_RE.search(_norm(raw_label)):
+        return None
+    # Évite les lignes d'adresse ou d'identifiants
+    if re.search(r"\b(?:n°|no|code|tel|portable|cabinet)\b", _norm(raw_label)):
+        return None
+
+    rest_clean, prior_value, prior_unit, prior_date, ref_min, ref_max, ref_raw = _extract_prior_and_refs(rest)
+    picked = _pick_value_and_unit(rest_clean, ref_min, ref_max, ref_raw=ref_raw, code=None)
+    if picked is None:
+        return None
+
+    value, unit = picked
+    has_ref = ref_min is not None or ref_max is not None
+    has_valid_unit = bool(unit and (_RAW_UNIT_HINT_RE.match(unit) or unit in _KNOWN_UNITS_SET))
+    # Exige au moins une unité biologique plausible ou une fourchette de référence pour éviter les faux positifs
+    if not has_ref and not has_valid_unit:
+        return None
+
+    out = {
+        "code": _make_raw_code(raw_label),
+        "name_printed": raw_label,
+        "value": value,
+        "unit": unit,
+        "reference_min": ref_min,
+        "reference_max": ref_max,
+        "raw_line": line.strip(),
+    }
+    if prior_value is not None:
+        out["prior_value"] = prior_value
+        out["prior_unit"] = prior_unit
+        out["prior_date"] = prior_date
+    return out
+
+
+def parse_line(line: str) -> dict | None:
+    deduped = _dedup_faux_bold(line)
+    normalized = _normalize_ocr_decimals(deduped)
+    cleaned = LEADER_RE.sub(" ", normalized)
+    cleaned = re.sub(r"\bMillions\s*/\s*mm[3³°\*\?'’®s]?", "Millions/mm³", cleaned, flags=re.I)
+    cleaned = re.sub(r"\s*/\s*mm[3³°\*\?'’®s]?", " /mm³", cleaned, flags=re.I)
+    code, raw_alias, is_fuzzy = _match_alias_with_mode(cleaned)
+    if code is None or raw_alias is None:
+        return _parse_unrecognized_line(line, cleaned)
+
+    idx = cleaned.find(raw_alias)
+    rest = cleaned[idx + len(raw_alias) :].lstrip(" .,:;|") if idx >= 0 else cleaned
+
+    while True:
+        dup_code, dup_alias = _exact_match_alias(rest)
+        if dup_code == code and dup_alias is not None:
+            rest = rest.lstrip()[len(dup_alias) :].lstrip(" .,:;|")
+        else:
+            break
+
+    rest, prior_value, prior_unit, prior_date, ref_min, ref_max, ref_raw = _extract_prior_and_refs(rest)
 
     picked = _pick_value_and_unit(rest, ref_min, ref_max, ref_raw=ref_raw, code=code)
     if picked is None:
         return None
 
     value, unit = picked
-    return {
+    if code == "HCT" and unit is None and ("%" in line or "yo" in line.lower() or "°/o" in line.lower()):
+        unit = "%"
+
+    out = {
         "code": code,
         "name_printed": _clean_display_name(code, raw_alias, is_fuzzy),
         "value": value,
@@ -366,17 +496,58 @@ def parse_line(line: str) -> dict | None:
         "reference_max": ref_max,
         "raw_line": line.strip(),
     }
+    if prior_value is not None:
+        out["prior_value"] = prior_value
+        out["prior_unit"] = prior_unit
+        out["prior_date"] = prior_date
+    return out
+
+
+def _split_glued_parameter_segments(line: str) -> list[str]:
+    """Sépare deux paramètres accidentellement fusionnés sur une même ligne par l'OCR."""
+    parts = [seg.strip() for seg in _SECONDARY_PARAM_RE.split(line) if seg and seg.strip()]
+    return parts if len(parts) > 1 else [line]
 
 
 def identify_parameters(text: str) -> list[dict]:
     out = []
-    for line in text.splitlines():
-        line = line.strip()
-        if line:
-            p = parse_line(line)
+    for raw_line in text.splitlines():
+        raw_line = raw_line.strip()
+        if not raw_line:
+            continue
+        for seg in _split_glued_parameter_segments(raw_line):
+            p = parse_line(seg)
             if p:
                 out.append(p)
     return out
+
+
+def _candidate_quality_score(param: dict) -> tuple[int, int, int]:
+    """Priorise la cohérence d'échelle (évite 38-55 vs 3,8-5,5), la complétude et les décimales."""
+    completeness = 0
+    if param.get("value") is not None:
+        completeness += 1
+    if param.get("unit"):
+        completeness += 1
+    lo = param.get("reference_min")
+    hi = param.get("reference_max")
+    val = param.get("value")
+    if lo is not None or hi is not None:
+        completeness += 1
+
+    scale_ok = 1
+    if val is not None:
+        if lo is not None and lo > 0 and val < lo * 0.2:
+            scale_ok = 0
+        if hi is not None and hi > 0 and val > hi * 5.0:
+            scale_ok = 0
+
+    decimal_pts = 0
+    for num in (val, lo, hi):
+        if isinstance(num, float) and not num.is_integer():
+            decimal_pts += 1
+
+    return (scale_ok, completeness, decimal_pts)
 
 
 def _completeness_score(param: dict) -> int:
@@ -391,7 +562,7 @@ def _completeness_score(param: dict) -> int:
 
 
 def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
-    """Identifie les paramètres page par page (tableaux + texte) avec numéro de page."""
+    """Identifie les paramètres page par page (tableaux + texte) avec sélection du meilleur candidat."""
     results: list[dict] = []
 
     for page_info in pages:
@@ -399,9 +570,16 @@ def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
         ocr_conf = page_info.get("ocr_confidence")
         page_candidates: dict[str, dict] = {}
 
+        raw_lines: list[str] = []
+        raw_lines.extend((page_info.get("text") or "").splitlines())
+        raw_lines.extend(page_info.get("table_rows") or [])
+
         candidate_lines: list[str] = []
-        candidate_lines.extend(page_info.get("table_rows") or [])
-        candidate_lines.extend((page_info.get("text") or "").splitlines())
+        for rl in raw_lines:
+            rl = rl.strip()
+            if not rl:
+                continue
+            candidate_lines.extend(_split_glued_parameter_segments(rl))
 
         n_lines = len(candidate_lines)
         for idx_line, raw_line in enumerate(candidate_lines):
@@ -425,7 +603,7 @@ def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
 
             code = parsed["code"]
             existing = page_candidates.get(code)
-            if existing is None or _completeness_score(parsed) > _completeness_score(existing):
+            if existing is None or _candidate_quality_score(parsed) > _candidate_quality_score(existing):
                 page_candidates[code] = parsed
 
         results.extend(page_candidates.values())

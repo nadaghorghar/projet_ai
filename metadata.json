@@ -1,0 +1,6 @@
+{
+  "name": "LabMind",
+  "description": "Outil pédagogique d'analyse et de compréhension de bilans biologiques (Angular + FastAPI).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -103,7 +103,9 @@ class FaissKnowledgeIndex:
         index_dir.mkdir(parents=True, exist_ok=True)
         save_passages_jsonl(self.passages, index_dir / self.PASSAGES_FILENAME)
         if self.index is not None:
-            faiss.write_index(self.index, str(index_dir / self.INDEX_FILENAME))
+            index_path = index_dir / self.INDEX_FILENAME
+            raw = faiss.serialize_index(self.index)
+            index_path.write_bytes(np.asarray(raw, dtype=np.uint8).tobytes())
 
     @classmethod
     def load(
@@ -113,7 +115,13 @@ class FaissKnowledgeIndex:
     ) -> FaissKnowledgeIndex:
         passages = load_passages_jsonl(index_dir / cls.PASSAGES_FILENAME)
         index_path = index_dir / cls.INDEX_FILENAME
-        index = faiss.read_index(str(index_path)) if index_path.is_file() else None
+        index = None
+        if index_path.is_file():
+            try:
+                raw = np.frombuffer(index_path.read_bytes(), dtype=np.uint8)
+                index = faiss.deserialize_index(raw)
+            except Exception:
+                index = faiss.read_index(str(index_path))
         return cls(passages=passages, index=index, embedder=embedder)
 
     def search(

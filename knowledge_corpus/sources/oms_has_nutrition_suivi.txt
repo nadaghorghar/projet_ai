@@ -1,0 +1,31 @@
+TITRE : Alimentation saine, activité physique, habitudes de vie et suivi médical (Synthèse OMS / HAS)
+ORGANISMES : Organisation mondiale de la Santé (OMS / WHO), Haute Autorité de Santé (HAS)
+URLS :
+- https://www.who.int/news-room/fact-sheets/detail/healthy-diet
+- https://www.has-sante.fr/upload/docs/application/pdf/2025-07/parcours_de_soins_du_patient_adulte_vivant_avec_un_diabete_de_type_2_-_guide_2025-07-15_16-42-8_797.pdf
+CONDITIONS : Synthèse pédagogique fidèle des recommandations publiques de santé publique.
+
+1. Conseils alimentaires généraux (OMS / WHO Healthy Diet) :
+- Une alimentation variée et équilibrée chez l'adulte associe légumes verts et colorés, fruits frais, légumineuses (lentilles, haricots, pois chiches), céréales complètes (avoine, riz ou pain complet), poissons (dont poissons gras comme sardine, maquereau ou saumon), fruits à coque et graines (amandes, noix, graines de courge).
+- L'OMS recommande de consommer au moins 400 g (environ 5 portions) de fruits et légumes variés par jour, tout en modérant les sucres libres, l'excès de sel et les graisses saturées ou trans industrielles au profit des graisses insaturées.
+- Une hydratation régulière principalement à base d'eau répartie sur la journée soutient l'équilibre général et la fonction rénale.
+- Ces repères alimentaires généraux doivent toujours être adaptés par un professionnel de santé en cas de pathologie rénale avancée, d'allergie alimentaire, de régime thérapeutique ou de traitement particulier.
+
+2. Activité physique et réduction de la sédentarité (OMS / HAS) :
+- Privilégier une activité physique régulière, modérée et progressive adaptée aux capacités individuelles, comme la marche régulière au quotidien.
+- Éviter de rester assis pendant de longues périodes consécutives en intégrant de courtes pauses actives ou des déplacements à pied.
+- Intégrer progressivement des activités d'endurance douce ou de renforcement modéré sans programme excessif ni effort brutal inadapté à l'état de santé.
+
+3. Habitudes de vie et prévention (OMS / HAS) :
+- Éviter le tabagisme et l'exposition à la fumée du tabac ; si la personne fume déjà, un accompagnement médical bienveillant et sans jugement aide à envisager un arrêt progressif.
+- Limiter ou éviter la consommation d'alcool afin de préserver l'équilibre hépatique, métabolique et général.
+- Maintenir un sommeil régulier et suffisant, essentiel à la récupération et à l'équilibre biologique.
+- Associer alimentation variée, hydratation adaptée et activité physique régulière, en sollicitant un professionnel de santé pour toute habitude nécessitant un accompagnement.
+
+4. Suivi médical, comparaisons et vigilance (HAS) :
+- Consulter son médecin traitant pour discuter des anomalies éventuelles et interpréter les résultats en tenant compte de l'âge, des symptômes et des antécédents.
+- Effectuer un contrôle biologique complémentaire ou répété uniquement si le médecin le recommande.
+- Respecter scrupuleusement les traitements déjà prescrits et ne jamais débuter, modifier ni interrompre un médicament sans avis médical.
+- Signaler rapidement au professionnel de santé tout symptôme inhabituel (fatigue persistante, essoufflement, malaise, crampes, jaunisse ou saignement).
+- Ne pas prendre de compléments alimentaires fortement dosés sans évaluation médicale préalable ; les habitudes de vie complètent le suivi médical mais ne remplacent pas une prise en charge adaptée.
+- Comparaison de résultats antérieurs : vérifier que l'unité de mesure et la méthode sont identiques avant toute comparaison.

@@ -40,6 +40,18 @@ class Evidence(BaseModel):
     page: int | None = None
 
 
+class PriorComparison(BaseModel):
+    """Comparaison arithmétique technique avec une valeur antérieure du même document."""
+
+    prior_value: float | None = None
+    prior_unit: str | None = None
+    prior_date: str | None = None
+    comparable: bool = False
+    delta: float | None = None
+    trend: Literal["increased", "decreased", "stable", "not_comparable"] = "not_comparable"
+    note: str | None = None
+
+
 class ParameterResult(BaseModel):
     code: str
     name_printed: str
@@ -49,12 +61,16 @@ class ParameterResult(BaseModel):
     status: ParameterStatus
     reason: str | None = None        # renseigné si status = not_analyzed
     confidence: float | None = None  # score technique dans [0.0, 1.0] si calculé
+    marked_deviation: bool = False   # écart arithmétique important (non diagnostique)
+    prior: PriorComparison | None = None
     evidence: Evidence
 
 
 def parameter_from_dict(p: dict) -> ParameterResult:
     """Convertit un paramètre (dict issu de l'analyse) en schéma validé."""
     has_ref = p.get("reference_min") is not None or p.get("reference_max") is not None
+    raw_prior = p.get("prior")
+    prior_obj = PriorComparison.model_validate(raw_prior) if isinstance(raw_prior, dict) else None
     return ParameterResult(
         code=p["code"],
         name_printed=p["name_printed"],
@@ -68,6 +84,8 @@ def parameter_from_dict(p: dict) -> ParameterResult:
         status=p["status"],
         reason=p.get("reason"),
         confidence=p.get("confidence"),
+        marked_deviation=bool(p.get("marked_deviation", False)),
+        prior=prior_obj,
         evidence=Evidence(
             raw_text=p.get("raw_line", ""),
             page=p.get("page"),

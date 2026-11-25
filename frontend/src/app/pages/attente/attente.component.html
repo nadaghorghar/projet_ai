@@ -3,20 +3,40 @@
     <div class="file-icon-box">DOC</div>
     <div class="file-meta">
       <div class="file-name">{{ filename }}</div>
-      <div class="file-sub">Analyse en cours</div>
+      <div class="file-sub">Analyse de votre bilan en cours</div>
     </div>
   </div>
 
   <div class="assistant-card wait-card">
-    <div class="spinner" aria-hidden="true"></div>
-    <h2>Lecture de votre bilan en cours...</h2>
-    <p class="wait-desc">
-      LabMind extrait vos paramètres et vérifie les valeurs par rapport aux fourchettes de votre
-      laboratoire. Cela prend quelques secondes.
-    </p>
+    <div class="loader-ring" aria-hidden="true"></div>
+    <h2>{{ activeMessage }}</h2>
+    <p class="wait-desc">Merci de patienter quelques instants pendant la préparation de votre synthèse.</p>
 
-    <button type="button" class="btn btn-ghost-danger" (click)="cancelAndDelete()">
-      Annuler et supprimer
+    <div
+      class="progress-track"
+      role="progressbar"
+      [attr.aria-valuenow]="progressPercent"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      <div class="progress-fill" [style.width.%]="progressPercent"></div>
+    </div>
+
+    <ol class="pipeline-steps" aria-label="Étapes de traitement">
+      @for (step of stages; track step; let idx = $index) {
+        <li
+          class="pipeline-step"
+          [class.step-done]="idx < stageIndex"
+          [class.step-active]="idx === stageIndex"
+        >
+          <span class="step-dot" aria-hidden="true">{{ idx < stageIndex ? '✓' : idx + 1 }}</span>
+          <span class="step-label">{{ step }}</span>
+        </li>
+      }
+    </ol>
+
+    <button type="button" class="btn btn-ghost" (click)="cancelAndReturn()">
+      Annuler
     </button>
   </div>
 </div>

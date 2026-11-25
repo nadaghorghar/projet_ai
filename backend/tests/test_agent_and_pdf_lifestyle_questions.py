@@ -161,8 +161,8 @@ def test_agent_tools_and_pdf_render_lifestyle_and_questions(tmp_path: Path) -> N
     full_text = " ".join(page.get("text", "") for page in pages)
     normalized = " ".join(full_text.split())
 
-    assert "Informations générales documentées (hygiène de vie)" in normalized
-    assert "anses-reperes-2026" in normalized
-    assert "Questions à préparer pour votre médecin" in normalized
+    assert "hygiène de vie" in normalized
+    assert "Sources médicales" not in normalized
+    assert "Questions à poser au médecin" in normalized
     assert "Comment interpréter cette ferritine selon mes symptômes ?" in normalized
     assert normalized.count(" ".join(DISCLAIMER.split())) == 1

@@ -1,5 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { LabmindApiService } from '../../services/labmind-api.service';
 
@@ -9,11 +10,15 @@ import { LabmindApiService } from '../../services/labmind-api.service';
   templateUrl: './accueil.component.html',
   styleUrl: './accueil.component.css'
 })
-export class AccueilComponent {
+export class AccueilComponent implements OnDestroy {
   private api = inject(LabmindApiService);
   private router = inject(Router);
+  private sanitizer = inject(DomSanitizer);
 
   selectedFile: File | null = null;
+  previewUrl: SafeUrl | null = null;
+  private rawObjectUrl: string | null = null;
+  isImagePreview = false;
   errorMessage = '';
   isDragging = false;
   isUploading = false;
@@ -48,27 +53,45 @@ export class AccueilComponent {
     }
   }
 
+  private revokePreview(): void {
+    if (this.rawObjectUrl) {
+      URL.revokeObjectURL(this.rawObjectUrl);
+      this.rawObjectUrl = null;
+    }
+    this.previewUrl = null;
+    this.isImagePreview = false;
+  }
+
   private pickFile(file: File): void {
     this.errorMessage = '';
     const ext = file.name.split('.').pop()?.toLowerCase() || '';
-
     if (!this.allowedExtensions.includes(ext)) {
+      this.revokePreview();
       this.selectedFile = null;
       this.errorMessage = 'Format non supporté. Veuillez choisir un fichier PDF, PNG ou JPG.';
       return;
     }
-
     if (file.size > this.maxBytes) {
+      this.revokePreview();
       this.selectedFile = null;
       this.errorMessage = 'Fichier trop volumineux (maximum 10 Mo).';
       return;
     }
 
+    this.revokePreview();
     this.selectedFile = file;
+    if (ext === 'png' || ext === 'jpg' || ext === 'jpeg') {
+      this.rawObjectUrl = URL.createObjectURL(file);
+      this.previewUrl = this.sanitizer.bypassSecurityTrustUrl(this.rawObjectUrl);
+      this.isImagePreview = true;
+    } else {
+      this.isImagePreview = false;
+    }
   }
 
   clearFile(event: Event): void {
     event.stopPropagation();
+    this.revokePreview();
     this.selectedFile = null;
     this.errorMessage = '';
   }
@@ -84,7 +107,6 @@ export class AccueilComponent {
       fileInput.click();
       return;
     }
-
     if (this.isUploading) return;
 
     this.errorMessage = '';
@@ -106,5 +128,9 @@ export class AccueilComponent {
         this.errorMessage = this.api.formatError(err).message;
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.revokePreview();
   }
 }

@@ -1,4 +1,6 @@
 .err-card {
   text-align: center;
-  padding: 30px 24px;
+  padding: 36px 24px;
+  max-width: 560px;
+  margin: 24px auto 0;
 }

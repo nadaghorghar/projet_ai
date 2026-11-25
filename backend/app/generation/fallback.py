@@ -79,6 +79,7 @@ class InsufficientSourcesGenerator:
         explanations = [
             build_unavailable_explanation(parameter)
             for parameter in request.parameters
+            if not parameter.code.startswith("RAW_")
         ]
         lifestyle_info = (
             build_unavailable_lifestyle_info()

@@ -1,13 +1,21 @@
 .topbar {
-  height: 64px;
-  padding: 0 24px;
+  height: 68px;
+  border-bottom: 1px solid var(--bordure);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.topbar-inner {
+  max-width: 980px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid var(--bordure);
-  background: var(--fond);
-  position: relative;
-  z-index: 20;
 }
 
 .brand {
@@ -23,14 +31,14 @@
 }
 
 .brand-text {
-  font-size: 1.3rem;
+  font-size: 1.32rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   color: var(--texte);
 }
 
 .brand-accent {
-  color: var(--indigo);
+  color: var(--violet-principal);
 }
 
 .topbar-right {
@@ -38,9 +46,9 @@
 }
 
 .shield-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   border: 1px solid var(--bordure);
   background: var(--surface);
   color: var(--texte-secondaire);
@@ -48,12 +56,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .shield-btn:hover {
-  border-color: var(--indigo);
-  color: var(--indigo);
+  border-color: var(--violet-secondaire);
+  color: var(--violet-principal);
+  background: var(--lavande);
 }
 
 .shield-btn svg {
@@ -64,14 +73,14 @@
 .privacy-popover {
   position: absolute;
   right: 0;
-  top: 46px;
+  top: 48px;
   width: 300px;
   background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  padding: 16px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
-  font-size: 0.85rem;
+  border: 1px solid var(--bordure-forte);
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: 0 18px 36px -12px rgba(81, 38, 181, 0.22);
+  font-size: 0.86rem;
   color: var(--texte-secondaire);
 }
 
@@ -82,24 +91,30 @@
 }
 
 .privacy-popover p {
-  margin: 0 0 10px;
-  line-height: 1.45;
+  margin: 0 0 12px;
+  line-height: 1.5;
 }
 
 .close-popover {
-  border: 1px solid var(--bordure);
-  background: var(--surface-alt);
-  color: var(--indigo);
+  border: 1px solid var(--bordure-forte);
+  background: var(--lavande);
+  color: var(--violet-principal);
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .app-main {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 68px);
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  .topbar-inner {
+    padding: 0 14px;
+  }
 }

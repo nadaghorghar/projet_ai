@@ -2,9 +2,11 @@
 
 Vérifie qu'une explication marquée 'grounded' :
 1. ne contient aucune formulation de diagnostic ou de traitement ;
-2. n'introduit aucun chiffre absent du paramètre et des passages cités ;
-3. recouvre lexicalement les extraits documentaires cités.
+2. ne contredit pas le statut réel du paramètre (normal vs hors norme) ;
+3. n'introduit aucun chiffre absent du paramètre et des passages cités ;
+4. recouvre lexicalement les extraits documentaires cités.
 """
+
 from __future__ import annotations
 
 import re
@@ -12,7 +14,7 @@ import unicodedata
 
 from pydantic import BaseModel, Field
 
-from app.schemas import ParameterResult
+from app.schemas import ParameterResult, ParameterStatus
 
 from .interface import (
     ExplanationStatus,
@@ -31,6 +33,28 @@ SAFETY_FORBIDDEN_PATTERNS = (
     r"\bdébuter\s+un\s+traitement\b",
     r"\bmodifier\s+votre\s+traitement\b",
     r"\bdose\s+quotidienne\b",
+)
+
+_PLACEHOLDER_PATTERNS = (
+    r"\b\d+\s*[àa-]\s*\d+\s+(?:rep[eè]res?|actions?|questions?|conseils?|exemples?|phrases?)\b",
+    r"\bnom\s+exact\s+de\s+l['’]?aliment\b",
+    r"\bcourte\s+phrase\s+pratique\b",
+    r"\bexemple\s+issu\s+des\s+extraits\b",
+    r"\btitre\s+court\s+adapt[ée]\b",
+    r"\bsource_id_exact\b",
+    r"\brep[eè]res?\s+d['’]hygi[eè]ne\s+de\s+vie\s*\(sommeil\b",
+    r"\brep[eè]res?\s+de\s+suivi\s*\(consulter\b",
+)
+
+_NORMAL_CONTRADICTION_PATTERNS = (
+    r"(?<!sans\s)(?<!aucune\s)(?<!pas\sde\s)(?<!pas\sd')\banemie\b",
+    r"(?<!sans\s)(?<!aucune\s)(?<!pas\sde\s)\bcarence\b",
+    r"(?<!sans\s)(?<!aucun\s)(?<!pas\sde\s)\bdeficit\b",
+    r"\bhors\s+(?:des\s+)?normes?\b",
+    r"\bau[-\s]dessus\s+de\s+(?:la\s+)?(?:norme|reference|fourchette|borne)\b",
+    r"\ben\s+dessous\s+de\s+(?:la\s+)?(?:norme|reference|fourchette|borne)\b",
+    r"\btrop\s+(?:eleve|elevee|bas|basse)\b",
+    r"(?<!sans\s)(?<!aucune\s)(?<!pas\sd')\banormal(?:e|es|ite)?\b",
 )
 
 _STOPWORDS = {
@@ -119,6 +143,33 @@ def _strip_accents(text: str) -> str:
     return "".join(ch for ch in decomposed if not unicodedata.combining(ch))
 
 
+def is_placeholder_text(text: str) -> bool:
+    """Détecte les textes parasites ou gabarits développeur recopiés par le LLM."""
+    cleaned = " ".join(text.strip().split())
+    if not cleaned:
+        return True
+    norm = _strip_accents(cleaned.lower())
+    return any(re.search(pat, norm, flags=re.IGNORECASE) for pat in _PLACEHOLDER_PATTERNS)
+
+
+def check_status_consistency(text: str, status: ParameterStatus) -> list[str]:
+    """Vérifie l'absence de contradiction entre le statut numérique et le texte généré."""
+    norm = _strip_accents(text.lower())
+    issues: list[str] = []
+    if status == ParameterStatus.within_reference:
+        for pat in _NORMAL_CONTRADICTION_PATTERNS:
+            if re.search(pat, norm, flags=re.IGNORECASE):
+                issues.append("Contradiction : le paramètre est normal mais le texte évoque une anomalie ou carence.")
+                break
+    elif status == ParameterStatus.above_reference:
+        if re.search(r"\b(?:en\s+dessous\s+de\s+la\s+norme|trop\s+bas(?:se)?)\b", norm):
+            issues.append("Contradiction : résultat au-dessus de la norme décrit comme trop bas.")
+    elif status == ParameterStatus.below_reference:
+        if re.search(r"\b(?:au[-\s]dessus\s+de\s+la\s+norme|trop\s+eleve(?:e)?)\b", norm):
+            issues.append("Contradiction : résultat en dessous de la norme décrit comme trop élevé.")
+    return issues
+
+
 def _stem_fr(token: str) -> str:
     """Normalisation morphologique légère pour le français (pluriels, féminins, dérivés)."""
     if len(token) <= 4:
@@ -164,7 +215,14 @@ def _allowed_numbers_for(
     for num in (parameter.value, parameter.reference.min, parameter.reference.max):
         if num is not None:
             allowed.add(f"{float(num):g}")
-
+    if parameter.prior is not None:
+        if parameter.prior.prior_value is not None:
+            allowed.add(f"{float(parameter.prior.prior_value):g}")
+        if parameter.prior.delta is not None:
+            allowed.add(f"{float(parameter.prior.delta):g}")
+            allowed.add(f"{abs(float(parameter.prior.delta)):g}")
+        if parameter.prior.prior_date:
+            allowed.update(_extract_numbers(parameter.prior.prior_date))
     for passage in cited_passages:
         allowed.update(_extract_numbers(passage.excerpt))
         allowed.update(_extract_numbers(passage.source.source_id))
@@ -182,7 +240,6 @@ def _allowed_numbers_for_lifestyle(
         for num in (parameter.value, parameter.reference.min, parameter.reference.max):
             if num is not None:
                 allowed.add(f"{float(num):g}")
-
     for passage in cited_passages:
         allowed.update(_extract_numbers(passage.excerpt))
         allowed.update(_extract_numbers(passage.source.source_id))
@@ -207,7 +264,7 @@ def check_explanation_grounding(
     passages: list[RetrievedPassage],
     min_overlap_ratio: float = 0.18,
 ) -> GroundingCheckResult:
-    """Vérifie qu'une explication est sûre et ancrée dans ses passages cités."""
+    """Vérifie qu'une explication est sûre, cohérente avec le statut et ancrée dans ses passages cités."""
     if explanation.status != ExplanationStatus.grounded:
         return GroundingCheckResult(
             is_grounded=False,
@@ -231,9 +288,14 @@ def check_explanation_grounding(
         )
 
     reasons: list[str] = []
+    if is_placeholder_text(explanation.text):
+        reasons.append("Texte gabarit non valide détecté.")
+
     safety_violations = check_safety_compliance(explanation.text)
     if safety_violations:
         reasons.append("Formulation non conforme aux garde-fous de prudence détectée.")
+
+    reasons.extend(check_status_consistency(explanation.text, parameter.status))
 
     allowed_nums = _allowed_numbers_for(parameter, cited_passages)
     found_nums = _extract_numbers(explanation.text)
@@ -301,6 +363,9 @@ def check_lifestyle_grounding(
         )
 
     reasons: list[str] = []
+    if is_placeholder_text(lifestyle_info.text):
+        reasons.append("Texte gabarit non valide détecté.")
+
     safety_violations = check_safety_compliance(lifestyle_info.text)
     if safety_violations:
         reasons.append("Formulation non conforme aux garde-fous de prudence détectée.")
@@ -377,7 +442,7 @@ def sanitize_consultation_questions(
     raw_questions: list[object],
     max_questions: int = 4,
 ) -> list[str]:
-    """Filtre les questions générées pour garantir neutralité, sûreté et format."""
+    """Filtre les questions générées pour garantir neutralité, sûreté et absence de texte gabarit."""
     cleaned_questions: list[str] = []
     seen_normalized: set[str] = set()
 
@@ -389,6 +454,8 @@ def sanitize_consultation_questions(
         if len(normalized) < 10 or len(normalized) > 240:
             continue
         if not normalized.endswith("?"):
+            continue
+        if is_placeholder_text(normalized):
             continue
         if check_safety_compliance(normalized):
             continue
@@ -407,7 +474,7 @@ def sanitize_action_steps(
     raw_steps: list[object],
     max_steps: int = 6,
 ) -> list[str]:
-    """Filtre les étapes d'action pour garantir prudence, clarté et absence de doublons."""
+    """Filtre les étapes d'action pour garantir prudence, clarté et absence de gabarits/doublons."""
     cleaned: list[str] = []
     seen: set[str] = set()
     for item in raw_steps:
@@ -416,6 +483,8 @@ def sanitize_action_steps(
         stripped = re.sub(r"^(?:[-*•]+|\d+[.)])\s*", "", item.strip())
         normalized = " ".join(stripped.split())
         if len(normalized) < 12 or len(normalized) > 260:
+            continue
+        if is_placeholder_text(normalized):
             continue
         if check_safety_compliance(normalized):
             continue

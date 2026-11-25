@@ -136,6 +136,8 @@ def _build_uncertainties(analyzed: list[dict]) -> list[UncertaintyItem]:
             continue
 
         code = raw["code"]
+        if str(code).startswith("RAW_"):
+            continue
         name_printed = raw.get("name_printed") or code
         reason_code = raw.get("reason_code") or ""
 
@@ -281,7 +283,7 @@ def run_retrieve_knowledge(
     active_codes: set[str] = set()
 
     for param in state.validated_parameters:
-        if param.status == ParameterStatus.not_analyzed:
+        if param.status == ParameterStatus.not_analyzed or param.code.startswith("RAW_"):
             continue
 
         active_codes.add(param.code)
@@ -303,17 +305,17 @@ def run_retrieve_knowledge(
         if active_codes & _MINERAL_RELATED_CODES:
             lifestyle_query = (
                 "sources alimentaires magnesium calcium fer fruits legumes legumineuses "
-                "produits cerealiers equilibre alimentaire "
+                "cereales completes poissons activite physique marche sommeil tabac alcool suivi medical "
                 + " ".join(prioritized_names[:5])
             )
         else:
             lifestyle_query = (
-                "equilibre alimentaire fruits legumes legumineuses produits cerealiers "
-                "hydratation rythme repas activite physique"
+                "equilibre alimentaire fruits legumes legumineuses cereales completes poissons "
+                "hydratation activite physique marche sedentarite sommeil tabac alcool suivi medical"
             )
         lifestyle_found = knowledge_index.search(
             query=lifestyle_query,
-            top_k=5,
+            top_k=6,
             categories=[MedicalCategory.hygiene_de_vie],
         )
 

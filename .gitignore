@@ -21,9 +21,3 @@ outputs/
 .idea/
 .DS_Store
 Thumbs.db
-node_modules/
-frontend/.angular/
-frontend/dist/
-
-frontend/.angular/
-frontend/dist/

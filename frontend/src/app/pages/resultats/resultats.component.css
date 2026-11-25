@@ -1,55 +1,243 @@
-.deleted-card {
-  text-align: center;
-  padding: 36px 24px;
-}
-
-.deleted-card p {
-  color: var(--texte-secondaire);
-  margin: 8px 0 20px;
+.doc-header {
+  justify-content: space-between;
 }
 
 .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-shrink: 0;
 }
 
+.vigilance-callout {
+  margin-top: 14px;
+  background: var(--rouge-clair);
+  border: 1px solid var(--rouge-bord);
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: var(--rouge);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
 .report-section {
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .section-spaced {
-  margin-top: 32px;
+  margin-top: 34px;
 }
 
-.section-spaced-lg {
-  margin-top: 38px;
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--texte);
+  margin: 0 0 14px;
 }
 
-.section-header-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.section-sub {
-  font-size: 0.92rem;
+.section-intro {
+  font-size: 0.95rem;
   color: var(--texte-secondaire);
-  margin: -4px 0 6px;
+  margin: -4px 0 18px;
+  line-height: 1.6;
 }
 
-.all-ok-note {
+/* 4.1 KPI Summary Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 18px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--ombre-carte);
+}
+
+.kpi-card.kpi-attention {
+  border-color: var(--rouge-bord);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF8F8 100%);
+}
+
+.kpi-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.kpi-icon-purple {
+  background: var(--lavande);
+  color: var(--violet-principal);
+}
+
+.kpi-icon-green {
+  background: var(--vert-clair);
   color: var(--vert);
-  font-size: 0.86rem;
+}
+
+.kpi-icon-red {
+  background: var(--rouge-clair);
+  color: var(--rouge);
+}
+
+.kpi-content {
+  min-width: 0;
+}
+
+.kpi-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--violet-principal);
+}
+
+.kpi-value-green {
+  color: var(--vert);
+}
+
+.kpi-value-red {
+  color: var(--rouge);
+}
+
+.kpi-label {
+  font-size: 0.85rem;
   font-weight: 600;
+  color: var(--texte-secondaire);
+  margin-top: 3px;
+}
+
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 18px;
+  padding: 18px 22px;
+  box-shadow: var(--ombre-carte);
+}
+
+.summary-text {
+  margin: 0;
+  color: var(--texte);
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+/* 4.2 Two-Tab Parameter Header */
+.params-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.params-header .section-title {
+  margin: 0;
+}
+
+.tabs-bar {
+  display: inline-flex;
+  background: var(--lavande);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--bordure);
+  gap: 4px;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--texte-secondaire);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: var(--violet-principal);
+}
+
+.tab-btn.active {
+  background: var(--surface);
+  color: var(--violet-principal);
+  box-shadow: 0 2px 8px rgba(81, 38, 181, 0.12);
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--fond);
+  color: var(--violet-principal);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.tab-count-alert {
+  background: var(--rouge-clair);
+  color: var(--rouge);
+}
+
+.empty-anomalies-card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 18px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: var(--ombre-carte);
+}
+
+.empty-anomalies-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--vert);
+  margin-bottom: 6px;
+}
+
+.empty-anomalies-sub {
+  color: var(--texte-secondaire);
+  font-size: 0.94rem;
+  margin-bottom: 16px;
 }
 
 .panel-card {
   background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: 14px;
-  padding: 6px 18px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--ombre-carte);
+}
+
+.row-anomaly {
+  background: #FFF9F9;
 }
 
 .cell-name {
@@ -57,8 +245,15 @@
   color: var(--texte);
 }
 
+.param-code {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--texte-secondaire);
+  margin-left: 4px;
+}
+
 .cell-value {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--texte);
   white-space: nowrap;
 }
@@ -71,146 +266,161 @@
   text-align: right;
 }
 
-.status-ok {
-  color: var(--vert);
-  font-weight: 600;
-  font-size: 0.86rem;
+.status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
   white-space: nowrap;
+}
+
+.status-ok {
+  background: var(--vert-clair);
+  color: var(--vert);
+  border: 1px solid var(--vert-bord);
 }
 
 .status-alert {
+  background: var(--rouge-clair);
   color: var(--rouge);
-  font-weight: 600;
-  font-size: 0.86rem;
-  white-space: nowrap;
+  border: 1px solid var(--rouge-bord);
 }
 
 .status-muted {
+  background: var(--gris-clair);
   color: var(--gris);
-  font-weight: 500;
-  font-size: 0.86rem;
+  border: 1px solid var(--bordure);
+}
+
+.marked-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--rouge);
+  color: #FFFFFF;
+  font-size: 0.72rem;
+  font-weight: 700;
   white-space: nowrap;
 }
 
-.meaning-box {
-  margin-top: 14px;
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  padding: 18px 20px;
+.prior-note {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--violet-secondaire);
 }
 
-.meaning-box ul {
+.prior-note.prior-warn {
+  color: var(--ambre);
+}
+
+.inline-uncertain-note {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ambre);
+}
+
+/* Explanations */
+.content-card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: var(--ombre-carte);
+}
+
+.content-card h3 {
+  margin: 0 0 10px;
+  color: var(--violet-principal);
+}
+
+.clean-list {
   margin: 0;
   padding-left: 20px;
   color: var(--texte-secondaire);
-  font-size: 0.92rem;
+  font-size: 0.94rem;
+  line-height: 1.6;
 }
 
-.meaning-box li + li {
+.clean-list li + li {
   margin-top: 8px;
 }
 
-.meaning-box strong {
+.clean-list strong {
   color: var(--texte);
 }
 
-.biochem-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.biochem-card {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 14px;
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.biochem-card-alert {
-  border-color: var(--rouge-bord);
-  background: rgba(127, 29, 29, 0.14);
-}
-
-.biochem-card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.biochem-title {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--texte);
-}
-
-.biochem-value {
-  font-size: 1.55rem;
-  font-weight: 700;
-  color: var(--texte);
-  margin-top: 4px;
-}
-
-.biochem-value.value-alert {
-  color: var(--rouge);
-}
-
-.biochem-unit {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: inherit;
-  margin-left: 2px;
-}
-
-.biochem-norm {
-  font-size: 0.84rem;
-  color: var(--texte-secondaire);
-}
-
-.biochem-desc {
-  margin: 4px 0 0;
-  font-size: 0.88rem;
-  color: var(--texte-secondaire);
-  line-height: 1.5;
-}
-
-.narrative-p {
-  font-size: 0.95rem;
-  color: var(--texte-secondaire);
-  margin-bottom: 18px;
-}
-
-.sub-heading {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 20px 0 12px;
-  color: var(--texte);
-}
-
-.food-grid {
+.explanations-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+  margin-top: 14px;
+}
+
+.exp-card {
+  background: var(--surface);
+  border: 1px solid var(--bordure);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--ombre-carte);
+}
+
+.exp-card-anomaly {
+  border-color: var(--rouge-bord);
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF9F9 100%);
+}
+
+.exp-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.exp-card-header strong {
+  font-size: 0.98rem;
+  color: var(--texte);
+}
+
+.exp-card-text {
+  margin: 0;
+  font-size: 0.91rem;
+  color: var(--texte-secondaire);
+  line-height: 1.58;
+}
+
+/* 4.3 Food Advice Cards — Full-bleed top image + structured body below */
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .food-card {
   background: var(--surface);
   border: 1px solid var(--bordure);
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
+  box-shadow: var(--ombre-carte);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.food-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px -12px rgba(81, 38, 181, 0.2);
 }
 
 .food-img-wrap {
-  aspect-ratio: 4 / 3;
-  max-height: 185px;
   width: 100%;
+  aspect-ratio: 16 / 10;
   overflow: hidden;
-  background: var(--surface-alt);
+  background: var(--lavande);
 }
 
 .food-img-wrap img {
@@ -221,60 +431,56 @@
 }
 
 .food-card-body {
-  padding: 14px 16px;
+  padding: 16px 18px 18px;
+  flex: 1;
 }
 
 .food-title {
   font-weight: 700;
-  font-size: 0.96rem;
+  font-size: 1.02rem;
   color: var(--texte);
-  margin-bottom: 4px;
+  margin: 0 0 6px;
 }
 
 .food-sub {
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   color: var(--texte-secondaire);
-}
-
-.action-list {
   margin: 0;
-  padding-left: 20px;
-  color: var(--texte);
-  font-size: 0.95rem;
+  line-height: 1.52;
 }
 
-.action-list li + li {
-  margin-top: 8px;
+.meal-plan-block {
+  margin-top: 22px;
+}
+
+.sub-heading {
+  font-size: 1.02rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--texte);
+}
+
+.guidance-two-col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.narrative-p {
+  font-size: 0.94rem;
+  color: var(--texte-secondaire);
+  line-height: 1.6;
 }
 
 .disclaimer-callout {
-  margin-top: 26px;
+  margin-top: 28px;
   background: var(--ambre-clair);
   border: 1px solid var(--ambre-bord);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px 18px;
-  color: #fbbf24;
+  color: var(--ambre);
   font-size: 0.9rem;
-}
-
-.sources-row {
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid var(--bordure);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.source-link {
-  color: var(--indigo);
-  font-size: 0.84rem;
   font-weight: 500;
-  text-decoration: none;
-}
-
-.source-link:hover {
-  text-decoration: underline;
 }
 
 .bottom-actions {
@@ -282,29 +488,91 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 22px;
+  margin-top: 24px;
   flex-wrap: wrap;
 }
 
-.delete-footer {
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.auto-del-hint {
-  font-size: 0.82rem;
-  color: var(--texte-secondaire);
-}
-
-@media (max-width: 820px) {
-  .biochem-grid {
+@media (max-width: 780px) {
+  .kpi-grid,
+  .explanations-grid,
+  .food-grid,
+  .guidance-two-col {
     grid-template-columns: 1fr;
   }
-  .food-grid {
-    grid-template-columns: 1fr;
+}
+
+@media (max-width: 640px) {
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tabs-bar {
+    width: 100%;
+  }
+
+  .tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* Responsive stacked rows on mobile without horizontal scrolling */
+  table.responsive-table thead {
+    display: none;
+  }
+
+  table.responsive-table,
+  table.responsive-table tbody,
+  table.responsive-table tr,
+  table.responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  table.responsive-table tr {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--bordure);
+  }
+
+  table.responsive-table tr:last-child {
+    border-bottom: none;
+  }
+
+  table.responsive-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+    border-bottom: none;
+    text-align: right;
+  }
+
+  table.responsive-table td:first-child {
+    display: block;
+    text-align: left;
+    padding-bottom: 8px;
+  }
+
+  table.responsive-table td:not(:first-child)::before {
+    content: attr(data-label);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--texte-secondaire);
+    text-align: left;
+  }
+
+  .meal-plan-block table.responsive-table td:not(:first-child) {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 3px;
+  }
+
+  .col-right {
+    text-align: right;
   }
 }

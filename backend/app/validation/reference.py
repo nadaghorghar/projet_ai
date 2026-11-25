@@ -3,9 +3,11 @@
 - classify : comparaison ARITHMÉTIQUE valeur / fourchette fournie par le laboratoire.
   Ce n'est pas une interprétation médicale.
 - check_parameter : présence et cohérence des champs.
-- plausible : détecte une lecture OCR douteuse (virgule perdue, par exemple).
+- plausible : détecte une lecture OCR douteuse (virgule perdue sur la valeur ou l'intervalle).
 """
 from __future__ import annotations
+
+_DECIMAL_SCALE_UNITS = {"Millions/mm³", "10^6/µL", "g/dL", "g/L", "mmol/L"}
 
 
 def classify(value, ref_min, ref_max) -> str:
@@ -44,11 +46,22 @@ def check_parameter(p: dict, accepted_units: list[str] | None) -> list[dict]:
 
 
 def plausible(p: dict) -> bool:
-    lo, hi, v = p["reference_min"], p["reference_max"], p["value"]
+    lo, hi, v = p.get("reference_min"), p.get("reference_max"), p.get("value")
     if v is None:
         return True
     if lo is not None and lo > 0 and v < lo / 10:
         return False
     if hi is not None and hi > 0 and v > hi * 10:
+        return False
+    # Détecte une perte de virgule ×10 sur la fourchette (ex. 4,50 face à 38-55 au lieu de 3,8-5,5)
+    if (
+        lo is not None
+        and hi is not None
+        and lo >= 10
+        and hi >= 10
+        and v < lo / 5
+        and (lo / 10.0) <= v <= (hi / 10.0)
+        and (p.get("unit") in _DECIMAL_SCALE_UNITS)
+    ):
         return False
     return True
