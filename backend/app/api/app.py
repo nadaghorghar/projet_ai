@@ -28,6 +28,7 @@ def create_app(
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(active_settings.cors_origins),
+        allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$",
         allow_credentials=False,
         allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
         allow_headers=["*"],
@@ -45,6 +46,17 @@ def create_app(
 
     app.state.settings = active_settings
     app.state.task_manager = task_manager or TaskManager(settings=active_settings)
+
+    @app.get("/", include_in_schema=False)
+    def root_info() -> dict[str, str]:
+        """Indique que l'API backend est active et pointe vers le frontend local."""
+        return {
+            "service": "LabMind API",
+            "status": "ok",
+            "docs": "/docs",
+            "health": "/v1/health",
+            "message": "Serveur backend actif. Ouvrez l'interface web sur http://localhost:4200 ou http://localhost:5173.",
+        }
 
     install_error_handlers(app)
     app.include_router(router)

@@ -64,6 +64,7 @@ export const FOOD_IMAGE_MAP: Readonly<Record<string, string>> = {
   spinach: 'assets/foods/spinach.jpg',
   lentils_chickpeas: 'assets/foods/lentils_chickpeas.jpg',
   fish: 'assets/foods/fish.jpg',
+  meat_poultry: 'assets/foods/meat_poultry.jpg',
   fruits: 'assets/foods/fruits.jpg',
   whole_grains: 'assets/foods/whole_grains.jpg',
   vegetables: 'assets/foods/vegetables.jpg',
@@ -74,21 +75,23 @@ export const FOOD_IMAGE_MAP: Readonly<Record<string, string>> = {
   hydration_water: 'assets/foods/hydration_water.jpg'
 };
 
+// Prefix '=' on a stem requires an exact word boundary (so '=pois' never matches 'poissons', '=ble' never matches 'blesser', '=lin' never matches 'linoleique')
 const FOOD_SEMANTIC_STEMS: ReadonlyArray<readonly [string, readonly string[]]> = [
-  ['walnuts', ['cerneau', 'noix de grenoble', 'noix']],
-  ['almonds_walnuts', ['amand', 'noisett', 'oleagineu', 'pistach', 'cajou']],
-  ['pumpkin_seeds', ['courge', 'graine', 'sesame', 'tournesol', 'chia', 'lin']],
-  ['spinach', ['epinard', 'bette', 'feuille verte', 'cresson', 'roquette', 'mache']],
-  ['lentils_chickpeas', ['lentill', 'chiche', 'haricot sec', 'haricots', 'legumineus', 'pois', 'feve']],
+  ['meat_poultry', ['viand', 'abat', 'boudin', '=foie', 'boeuf', 'veau', 'agneau', 'volaille', 'poulet', 'dinde', 'fer heminique']],
   ['fish', ['poisson', 'saumon', 'sardine', 'maquereau', 'hareng', 'truite', 'thon', 'merlu', 'cabillaud']],
+  ['lentils_chickpeas', ['lentill', 'pois chiche', 'petits pois', '=pois', 'haricot sec', 'haricots secs', 'legumineus', 'feve']],
+  ['walnuts', ['cerneau', 'noix de grenoble', '=noix']],
+  ['almonds_walnuts', ['amand', 'noisett', 'oleagineu', 'pistach', 'cajou']],
+  ['pumpkin_seeds', ['courge', 'graine', 'sesame', 'tournesol', 'chia', '=lin']],
+  ['spinach', ['epinard', 'bette', 'feuille verte', 'feuilles vertes', 'legumes verts', 'cresson', 'roquette', 'mache']],
   ['fruits', ['fruit', 'orange', 'agrume', 'pomme', 'kiwi', 'baie', 'fraise', 'banane', 'citron', 'myrtille']],
-  ['whole_grains', ['cereal', 'complet', 'avoine', 'quinoa', 'riz', 'pain', 'seigle', 'ble', 'sarrasin']],
+  ['whole_grains', ['cereal', 'complet', 'avoine', 'quinoa', '=riz', '=pain', 'seigle', '=ble', 'sarrasin']],
   ['vegetables', ['legume', 'brocoli', 'carotte', 'poivron', 'courgette', 'tomate', 'haricot vert', 'chou']],
-  ['dairy_yogurt', ['produit laitier', 'produits laitiers', 'laitier', 'yaourt', 'fromage', 'kefir', 'lait']],
-  ['eggs_protein', ['oeuf', 'volaille', 'poulet', 'dinde', 'viande maigre', 'proteine']],
-  ['avocado_olive_oil', ['avocat', 'huile d olive', 'olive', 'colza', 'lipide vegeta']],
+  ['dairy_yogurt', ['produit laitier', 'produits laitiers', 'laitier', 'laitage', 'yaourt', 'fromage', 'kefir', '=lait']],
+  ['eggs_protein', ['oeuf', 'jaune d oeuf', 'proteine']],
+  ['avocado_olive_oil', ['avocat', 'huile d olive', '=olive', 'colza', 'lipide vegeta']],
   ['dark_chocolate', ['chocolat', 'cacao']],
-  ['hydration_water', ['eau', 'hydrat', 'infusion', 'tisane', 'boisson']]
+  ['hydration_water', ['=eau', 'eau minerale', 'hydrat', 'infusion', 'tisane', 'boisson']]
 ];
 
 export function stripAccents(value: string): string {
@@ -96,6 +99,7 @@ export function stripAccents(value: string): string {
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
+    .replace(/['’]/g, ' ')
     .trim();
 }
 
@@ -105,12 +109,15 @@ export function isPlaceholderLabel(text: unknown): boolean {
   return /\b\d+\s*[àa-]\s*\d+\s+(?:rep[eè]res?|actions?|questions?|conseils?|exemples?|phrases?)\b/i.test(clean);
 }
 
-function matchesSemanticStem(normalizedText: string, stem: string): boolean {
-  if (stem.includes(' ')) {
-    return normalizedText.includes(stem);
-  }
+function findStemPosition(normalizedText: string, rawStem: string): number {
+  const exactWord = rawStem.startsWith('=');
+  const stem = exactWord ? rawStem.slice(1) : rawStem;
   const escaped = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`\\b${escaped}\\w*`, 'i').test(normalizedText);
+  const pattern = exactWord
+    ? new RegExp(`\\b${escaped}\\b`, 'i')
+    : new RegExp(`\\b${escaped}\\w*`, 'i');
+  const match = pattern.exec(normalizedText);
+  return match ? match.index : -1;
 }
 
 function findSemanticFoodKey(
@@ -120,14 +127,25 @@ function findSemanticFoodKey(
   failedKeys: Set<string>
 ): string | null {
   const normTitle = stripAccents(title);
-  const normBoth = stripAccents(`${title} ${subtitle}`);
+  const normSubtitle = stripAccents(subtitle);
 
-  for (const text of [normTitle, normBoth]) {
+  // 1) Prioritize food mentioned earliest in the title; 2) otherwise earliest in the subtitle
+  for (const text of [normTitle, normSubtitle]) {
+    if (!text) continue;
+    let bestKey: string | null = null;
+    let bestPos = Number.POSITIVE_INFINITY;
     for (const [key, stems] of FOOD_SEMANTIC_STEMS) {
       if (usedKeys.has(key) || failedKeys.has(key) || !FOOD_IMAGE_MAP[key]) continue;
-      if (stems.some((stem) => matchesSemanticStem(text, stem))) {
-        return key;
+      for (const stem of stems) {
+        const pos = findStemPosition(text, stem);
+        if (pos !== -1 && pos < bestPos) {
+          bestPos = pos;
+          bestKey = key;
+        }
       }
+    }
+    if (bestKey) {
+      return bestKey;
     }
   }
   return null;
@@ -164,24 +182,19 @@ export function resolveNutritionHighlights(
       continue;
     }
 
-    let chosenKey: string | null = null;
+    const semanticKey = findSemanticFoodKey(title, subtitle, usedKeys, failed);
 
-    // Prefer explicit backend image_key when it is valid, unused, non-neutral, and matches title semantics (or no better semantic override)
-    if (
+    let chosenKey: string | null = null;
+    if (semanticKey) {
+      chosenKey = semanticKey;
+    } else if (
       rawKey &&
       rawKey !== 'neutral' &&
       FOOD_IMAGE_MAP[rawKey] &&
-      !usedKeys.has(rawKey)
+      !usedKeys.has(rawKey) &&
+      !failed.has(rawKey)
     ) {
-      const semanticOverride = findSemanticFoodKey(title, '', usedKeys, failed);
-      // If title explicitly refers to e.g. "Noix" while backend sent "almonds_walnuts", prefer "walnuts"
-      if (semanticOverride && semanticOverride !== rawKey) {
-        chosenKey = semanticOverride;
-      } else {
-        chosenKey = rawKey;
-      }
-    } else {
-      chosenKey = findSemanticFoodKey(title, subtitle, usedKeys, failed);
+      chosenKey = rawKey;
     }
 
     if (!chosenKey || !FOOD_IMAGE_MAP[chosenKey] || usedKeys.has(chosenKey) || failed.has(chosenKey)) {

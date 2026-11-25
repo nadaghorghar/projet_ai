@@ -29,6 +29,7 @@ export class ResultatsComponent implements OnInit {
   pdfUrl = '';
   activeTab: 'anomalies' | 'all' = 'anomalies';
   failedFoodKeys = new Set<string>();
+  expandedExplanations = new Set<string>();
 
   ngOnInit(): void {
     this.taskId = this.route.snapshot.paramMap.get('id') || '';
@@ -116,8 +117,13 @@ export class ResultatsComponent implements OnInit {
 
   get orderedConciseExplanations(): Array<{
     code: string;
+    codeBadge: string;
     name: string;
     status: string;
+    valueText: string;
+    normText: string;
+    priorNote: string | null;
+    markedDeviation: boolean;
     text: string;
     isAnomaly: boolean;
   }> {
@@ -140,14 +146,47 @@ export class ResultatsComponent implements OnInit {
         const isAnomaly = status === 'below_reference' || status === 'above_reference';
         return {
           code: e.code,
+          codeBadge: param && this.shouldShowCodeBadge(param) ? this.displayCode(param.code) : '',
           name: param?.name_printed || e.code,
           status,
+          valueText: param ? this.formatResult(param) : '—',
+          normText: param ? this.formatNorm(param.reference, param.unit) : 'Non fournie',
+          priorNote: param?.prior?.note || null,
+          markedDeviation: !!param?.marked_deviation,
           text: String(e.text).trim(),
           isAnomaly
         };
       });
 
     return items.sort((a: any, b: any) => Number(b.isAnomaly) - Number(a.isAnomaly));
+  }
+
+  toggleExplanation(code: string): void {
+    const next = new Set(this.expandedExplanations);
+    if (next.has(code)) {
+      next.delete(code);
+    } else {
+      next.add(code);
+    }
+    this.expandedExplanations = next;
+  }
+
+  isExplanationExpanded(code: string): boolean {
+    return this.expandedExplanations.has(code);
+  }
+
+  get areAllExplanationsExpanded(): boolean {
+    const items = this.orderedConciseExplanations;
+    return items.length > 0 && items.every((item) => this.expandedExplanations.has(item.code));
+  }
+
+  toggleAllExplanations(): void {
+    const items = this.orderedConciseExplanations;
+    if (this.areAllExplanationsExpanded) {
+      this.expandedExplanations = new Set<string>();
+    } else {
+      this.expandedExplanations = new Set(items.map((item) => item.code));
+    }
   }
 
   get markedDeviationParams(): LabParameter[] {

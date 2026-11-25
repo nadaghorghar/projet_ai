@@ -243,6 +243,8 @@
 .cell-name {
   font-weight: 600;
   color: var(--texte);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .param-code {
@@ -353,102 +355,6 @@
   color: var(--texte);
 }
 
-.explanations-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 14px;
-}
-
-.exp-card {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 16px;
-  padding: 18px 20px;
-  box-shadow: var(--ombre-carte);
-}
-
-.exp-card-anomaly {
-  border-color: var(--rouge-bord);
-  background: linear-gradient(180deg, #FFFFFF 0%, #FFF9F9 100%);
-}
-
-.exp-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.exp-card-header strong {
-  font-size: 0.98rem;
-  color: var(--texte);
-}
-
-.exp-card-text {
-  margin: 0;
-  font-size: 0.91rem;
-  color: var(--texte-secondaire);
-  line-height: 1.58;
-}
-
-/* 4.3 Food Advice Cards — Full-bleed top image + structured body below */
-.food-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.food-card {
-  background: var(--surface);
-  border: 1px solid var(--bordure);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: var(--ombre-carte);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
-}
-
-.food-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px -12px rgba(81, 38, 181, 0.2);
-}
-
-.food-img-wrap {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  background: var(--lavande);
-}
-
-.food-img-wrap img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.food-card-body {
-  padding: 16px 18px 18px;
-  flex: 1;
-}
-
-.food-title {
-  font-weight: 700;
-  font-size: 1.02rem;
-  color: var(--texte);
-  margin: 0 0 6px;
-}
-
-.food-sub {
-  font-size: 0.9rem;
-  color: var(--texte-secondaire);
-  margin: 0;
-  line-height: 1.52;
-}
-
 .meal-plan-block {
   margin-top: 22px;
 }
@@ -494,8 +400,6 @@
 
 @media (max-width: 780px) {
   .kpi-grid,
-  .explanations-grid,
-  .food-grid,
   .guidance-two-col {
     grid-template-columns: 1fr;
   }

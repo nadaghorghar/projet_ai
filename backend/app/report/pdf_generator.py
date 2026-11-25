@@ -32,20 +32,21 @@ _TEXT_MUTED = "#524B6E"
 
 _FOOD_ASSETS_DIR = PROJECT_DIR / "frontend" / "public" / "assets" / "foods"
 _PDF_FOOD_STEMS: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("walnuts", ("cerneau", "noix de grenoble", "noix")),
-    ("almonds_walnuts", ("amand", "noisett", "oleagineu", "pistach")),
-    ("pumpkin_seeds", ("courge", "graine", "sesame", "tournesol", "lin")),
-    ("spinach", ("bette", "feuille verte", "cresson", "roquette")),
-    ("lentils_chickpeas", ("chiche", "haricot", "legumineus", "pois", "feve")),
+    ("meat_poultry", ("viand", "abat", "boudin", "=foie", "boeuf", "volaille", "poulet", "dinde", "fer heminique")),
     ("fish", ("poisson", "saumon", "sardine", "maquereau", "hareng", "truite", "thon")),
+    ("lentils_chickpeas", ("lentill", "pois chiche", "petits pois", "=pois", "haricot sec", "legumineus", "feve")),
+    ("walnuts", ("cerneau", "noix de grenoble", "=noix")),
+    ("almonds_walnuts", ("amand", "noisett", "oleagineu", "pistach")),
+    ("pumpkin_seeds", ("courge", "graine", "sesame", "tournesol", "=lin")),
+    ("spinach", ("epinard", "bette", "feuille verte", "feuilles vertes", "legumes verts", "cresson", "roquette")),
     ("fruits", ("fruit", "orange", "agrume", "pomme", "kiwi", "baie", "fraise", "banane", "citron")),
-    ("whole_grains", ("cereal", "complet", "avoine", "quinoa", "riz", "pain", "seigle", "ble")),
+    ("whole_grains", ("cereal", "complet", "avoine", "quinoa", "=riz", "=pain", "seigle", "=ble")),
     ("vegetables", ("legume", "brocoli", "carotte", "poivron", "courgette", "tomate")),
-    ("dairy_yogurt", ("laitier", "yaourt", "fromage", "kefir", "lait")),
-    ("eggs_protein", ("oeuf", "volaille", "poulet", "dinde", "proteine")),
-    ("avocado_olive_oil", ("avocat", "colza", "olive")),
+    ("dairy_yogurt", ("produit laitier", "laitier", "yaourt", "fromage", "kefir", "=lait")),
+    ("eggs_protein", ("oeuf", "proteine")),
+    ("avocado_olive_oil", ("avocat", "colza", "=olive")),
     ("dark_chocolate", ("chocolat", "cacao")),
-    ("hydration_water", ("eau", "hydrat", "infusion", "tisane")),
+    ("hydration_water", ("=eau", "hydrat", "infusion", "tisane")),
 )
 
 _UNICODE_FONT_CANDIDATES: tuple[tuple[str, str, str, str], ...] = (
@@ -72,28 +73,47 @@ _UNICODE_FONT_CANDIDATES: tuple[tuple[str, str, str, str], ...] = (
 
 def _strip_accents(value: str) -> str:
     decomposed = unicodedata.normalize("NFKD", value or "")
-    return "".join(ch for ch in decomposed if not unicodedata.combining(ch)).lower()
+    return "".join(ch for ch in decomposed if not unicodedata.combining(ch)).lower().replace("'", " ").replace("’", " ")
+
+
+def _find_pdf_stem_pos(haystack: str, raw_stem: str) -> int:
+    exact = raw_stem.startswith("=")
+    stem = raw_stem[1:] if exact else raw_stem
+    pattern = rf"\b{re.escape(stem)}\b" if exact else rf"\b{re.escape(stem)}\w*"
+    m = re.search(pattern, haystack)
+    return m.start() if m else -1
 
 
 def _resolve_pdf_food_image(title: str, subtitle: str, raw_key: str, used: set[str]) -> Path | None:
     if not _FOOD_ASSETS_DIR.is_dir():
         return None
+    norm_title = _strip_accents(title)
+    norm_sub = _strip_accents(subtitle)
+    for text in (norm_title, norm_sub):
+        if not text:
+            continue
+        ranked: list[tuple[int, str]] = []
+        for key, stems in _PDF_FOOD_STEMS:
+            if key in used:
+                continue
+            for stem in stems:
+                pos = _find_pdf_stem_pos(text, stem)
+                if pos != -1:
+                    ranked.append((pos, key))
+        if ranked:
+            ranked.sort(key=lambda item: item[0])
+            chosen = ranked[0][1]
+            candidate = _FOOD_ASSETS_DIR / f"{chosen}.jpg"
+            if candidate.is_file():
+                used.add(chosen)
+                return candidate
+
     cleaned_key = re.sub(r"[^a-z0-9_]", "", (raw_key or "").strip().lower())
     if cleaned_key and cleaned_key != "neutral" and cleaned_key not in used:
         candidate = _FOOD_ASSETS_DIR / f"{cleaned_key}.jpg"
         if candidate.is_file():
             used.add(cleaned_key)
             return candidate
-
-    haystack = _strip_accents(f"{title} {subtitle}")
-    for key, stems in _PDF_FOOD_STEMS:
-        if key in used:
-            continue
-        if any(re.search(rf"\b{re.escape(stem)}\w*", haystack) for stem in stems):
-            candidate = _FOOD_ASSETS_DIR / f"{key}.jpg"
-            if candidate.is_file():
-                used.add(key)
-                return candidate
     return None
 
 

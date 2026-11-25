@@ -40,6 +40,15 @@ test('resolveNutritionHighlights assigns unique real images and filters unmapped
   // Strictly unique image URLs
   const uniqueUrls = new Set(resolved.map((c) => c.imageUrl));
   assert.equal(uniqueUrls.size, resolved.length);
+
+  // Regression: "Viandes, poissons, abats" must never match "lentils_chickpeas" via "pois" prefix
+  const ironCards = resolveNutritionHighlights([
+    { title: 'Fer héminique', subtitle: 'Viandes, poissons, abats', image_key: 'lentils_chickpeas' },
+    { title: 'Fer non héminique', subtitle: 'Légumineuses, céréales, noix, légumes verts, jaune d’œuf', image_key: 'walnuts' }
+  ]);
+  assert.equal(ironCards.length, 2);
+  assert.equal(ironCards[0].imageKey, 'meat_poultry');
+  assert.equal(ironCards[1].imageKey, 'lentils_chickpeas');
 });
 
 test('resolveNutritionHighlights drops cards whose images fail to load', () => {

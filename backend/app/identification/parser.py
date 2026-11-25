@@ -260,13 +260,31 @@ def match_alias(line: str) -> tuple[str | None, str | None]:
     return code, raw
 
 
+_OCR_MISREAD_ALIASES = {
+    "tomb",
+    "tomh",
+    "tcmn",
+    "tcnh",
+    "tcmb",
+    "tgmh",
+    "icmh",
+    "comb",
+    "comh",
+    "ccmn",
+    "cchm",
+    "ccmb",
+    "cgmh",
+}
+
+
 def _clean_display_name(code: str, raw_alias: str, is_fuzzy: bool) -> str:
     """Remplace les intitulés déformés par l'OCR par un nom français lisible."""
     raw_clean = raw_alias.strip()
     has_ocr_casing_glitch = bool(
         re.search(r"[a-zà-ÿ][A-ZÀ-Ý]", raw_clean)
     ) and code not in ("HBA1C",)
-    if is_fuzzy or has_ocr_casing_glitch:
+    is_ocr_misread_alias = _norm(raw_clean) in _OCR_MISREAD_ALIASES
+    if is_fuzzy or has_ocr_casing_glitch or is_ocr_misread_alias:
         return CANONICAL_DISPLAY_NAMES.get(code, raw_clean)
     return raw_clean
 
@@ -332,14 +350,62 @@ _METADATA_IGNORE_RE = re.compile(
     r"demand[ée]\s+par|docteur|laboratoire|biologiste|valeurs?\s+usuelles?|"
     r"r[ée]sultats?\s+d['’]analyses?|page\s*:?\s*\d|t[ée]l\.?|fax|email|"
     r"h[ée]mogramme|formule\s+leucocytaire|analyses?\s+d[e']|sp[ée]cialiste|"
-    r"remercions|r[ée]tablissement|adresse|avenue|boulevard|rue|code\s+patient)\b",
+    r"remercions|r[ée]tablissement|adresse|avenue|boulevard|rue|code\s+patient|"
+    r"moknine|tunis|bact[ée]riologie|virologie|s[ée]rologie|immunologie|biochimie|"
+    r"hormonologie|h[ée]matologie|parasitologie|mycologie|biologie\s+mol[ée]culaire)\b",
     re.I,
 )
 _RAW_UNIT_HINT_RE = re.compile(
-    r"^(?:[a-zµμ%]+(?:/[a-z0-9²³µμ]+)*|UI/L|mUI/L|U/L|U/mL|UI/mL|mEq/L|ng/mL|pg/mL|"
-    r"pmol/L|nmol/L|µmol/L|mmol/L|mg/L|mg/dL|g/L|g/dL|µg/L|µg/dL|fL|pg|%|/mm³|Millions/mm³)$",
+    r"^(?:"
+    r"[a-zµμ]{1,8}(?:/[a-z0-9²³µμ.]{1,10})+"
+    r"|%|fL|pg|UI|mUI|µUI|kUI|kat|nkat|mm|sec|pH|mOsm|osm"
+    r"|/mm³|Millions/mm³|10\^[36]/µL"
+    r")$",
     re.I,
 )
+_TINY_CONNECTOR_WORDS = {"de", "du", "des", "en", "et", "au", "aux", "ou", "a", "à", "la", "le", "ph"}
+_OCR_LABEL_GARBAGE_CHAR_RE = re.compile(r"[~!?=$@#\\{}^|\[\]]")
+
+
+def _is_ocr_leader_gibberish_token(tok: str) -> bool:
+    """Détecte les faux mots générés par l'OCR sur les pointillés (ex: 'nsssstidtssiis...', 'essessesses...')."""
+    core = tok.strip(".,:;|_-•·…'\"`‘’“”()")
+    if len(core) < 4:
+        return False
+    if re.search(r"([a-zA-Z])\1\1", core):
+        return True
+    if len(core) >= 12 and core.isalpha() and core.islower():
+        unique_ratio = len(set(core)) / len(core)
+        dot_letters = sum(core.count(c) for c in "esncitaor") / len(core)
+        bigram_repeats = len(re.findall(r"(?:ss|ee|es|se|ns|sn|cc|tt|ii)", core))
+        if (len(set(core)) <= 9 and dot_letters >= 0.72) or bigram_repeats >= 3 or (len(core) >= 20 and unique_ratio < 0.42):
+            return True
+    return False
+
+
+def _strip_ocr_leader_noise(text: str) -> str:
+    """Supprime les séquences parasites issues des pointillés de mise en page."""
+    tokens = text.split()
+    if len(tokens) < 2:
+        return text
+    drop_indices: set[int] = set()
+    for idx, tok in enumerate(tokens):
+        if _is_ocr_leader_gibberish_token(tok):
+            drop_indices.add(idx)
+            # Retire un court artéfact OCR juste avant les pointillés (ex: 'TOMB ons nsssstid...', 'COMB ss essess...')
+            if idx >= 2:
+                prev = tokens[idx - 1]
+                if (
+                    prev.isalpha()
+                    and prev.islower()
+                    and len(prev) <= 3
+                    and _norm(prev) not in _TINY_CONNECTOR_WORDS
+                ):
+                    drop_indices.add(idx - 1)
+    if not drop_indices:
+        return text
+    kept = [tok for idx, tok in enumerate(tokens) if idx not in drop_indices]
+    return " ".join(kept)
 
 
 def _make_raw_code(label: str) -> str:
@@ -417,11 +483,19 @@ def _parse_unrecognized_line(line: str, cleaned: str) -> dict | None:
 
     raw_label = cleaned[: m_split.start()].strip(" .,:;|_-•·…")
     rest = cleaned[m_split.end() :].strip()
-    if len(raw_label) < 2 or len(raw_label) > 70:
+    if len(raw_label) < 2 or len(raw_label) > 65:
         return None
-    if not any(ch.isalpha() for ch in raw_label):
+    if _OCR_LABEL_GARBAGE_CHAR_RE.search(raw_label):
+        return None
+    if raw_label[0] in ("(", "[", "{", "'", '"', "«"):
+        return None
+    alpha_count = sum(1 for ch in raw_label if ch.isalpha())
+    compact_len = len(raw_label.replace(" ", ""))
+    if alpha_count < 2 or (compact_len > 0 and alpha_count / compact_len < 0.55):
         return None
     if raw_label[0].isdigit():
+        return None
+    if any(_is_ocr_leader_gibberish_token(tok) for tok in raw_label.split()):
         return None
     if _METADATA_IGNORE_RE.search(_norm(raw_label)):
         return None
@@ -439,6 +513,9 @@ def _parse_unrecognized_line(line: str, cleaned: str) -> dict | None:
     has_valid_unit = bool(unit and (_RAW_UNIT_HINT_RE.match(unit) or unit in _KNOWN_UNITS_SET))
     # Exige au moins une unité biologique plausible ou une fourchette de référence pour éviter les faux positifs
     if not has_ref and not has_valid_unit:
+        return None
+    # Sans fourchette de référence et sans unité connue, rejette les labels trop courts ou au format incohérent
+    if not has_ref and len(raw_label) <= 4 and not raw_label.isupper():
         return None
 
     out = {
@@ -461,6 +538,7 @@ def parse_line(line: str) -> dict | None:
     deduped = _dedup_faux_bold(line)
     normalized = _normalize_ocr_decimals(deduped)
     cleaned = LEADER_RE.sub(" ", normalized)
+    cleaned = _strip_ocr_leader_noise(cleaned)
     cleaned = re.sub(r"\bMillions\s*/\s*mm[3³°\*\?'’®s]?", "Millions/mm³", cleaned, flags=re.I)
     cleaned = re.sub(r"\s*/\s*mm[3³°\*\?'’®s]?", " /mm³", cleaned, flags=re.I)
     code, raw_alias, is_fuzzy = _match_alias_with_mode(cleaned)
@@ -561,6 +639,27 @@ def _completeness_score(param: dict) -> int:
     return score
 
 
+def _find_duplicate_raw_key(page_candidates: dict[str, dict], parsed: dict) -> str:
+    """Évite les doublons RAW_* entre passes OCR quand la valeur, l'unité et le préfixe coïncident."""
+    code = parsed["code"]
+    if code in page_candidates or not code.startswith("RAW_"):
+        return code
+    p_name = _norm(parsed.get("name_printed") or "")
+    p_val = parsed.get("value")
+    p_unit = parsed.get("unit")
+    for existing_code, existing in page_candidates.items():
+        if not existing_code.startswith("RAW_"):
+            continue
+        if existing.get("value") == p_val and existing.get("unit") == p_unit:
+            e_name = _norm(existing.get("name_printed") or "")
+            if (
+                difflib.SequenceMatcher(None, p_name, e_name).ratio() >= 0.72
+                or (p_name.split()[:1] and p_name.split()[:1] == e_name.split()[:1])
+            ):
+                return existing_code
+    return code
+
+
 def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
     """Identifie les paramètres page par page (tableaux + texte) avec sélection du meilleur candidat."""
     results: list[dict] = []
@@ -588,10 +687,10 @@ def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
                 continue
             parsed = parse_line(line)
             if not parsed and idx_line + 1 < n_lines:
-                alias_code, _ = match_alias(LEADER_RE.sub(" ", _dedup_faux_bold(line)))
+                alias_code, _ = match_alias(_strip_ocr_leader_noise(LEADER_RE.sub(" ", _dedup_faux_bold(line))))
                 next_line = candidate_lines[idx_line + 1].strip()
                 if alias_code is not None and next_line:
-                    next_alias, _ = match_alias(LEADER_RE.sub(" ", _dedup_faux_bold(next_line)))
+                    next_alias, _ = match_alias(_strip_ocr_leader_noise(LEADER_RE.sub(" ", _dedup_faux_bold(next_line))))
                     if next_alias is None:
                         parsed = parse_line(f"{line} {next_line}")
             if not parsed:
@@ -601,10 +700,10 @@ def identify_parameters_from_pages(pages: list[dict]) -> list[dict]:
             if ocr_conf is not None:
                 parsed["source_ocr_confidence"] = ocr_conf
 
-            code = parsed["code"]
-            existing = page_candidates.get(code)
+            target_key = _find_duplicate_raw_key(page_candidates, parsed)
+            existing = page_candidates.get(target_key)
             if existing is None or _candidate_quality_score(parsed) > _candidate_quality_score(existing):
-                page_candidates[code] = parsed
+                page_candidates[target_key] = parsed
 
         results.extend(page_candidates.values())
 

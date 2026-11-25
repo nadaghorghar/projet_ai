@@ -8,7 +8,7 @@ import { Observable, of, throwError, delay } from 'rxjs';
 export class LabmindApiService {
   private http = inject(HttpClient);
 
-  // Branché sur le backend FastAPI réel (lancer Angular sur --port 5173)
+  // Branché sur le backend FastAPI réel (lancer Angular sur http://localhost:4200 ou --port 5173)
   readonly useMock = false;
   readonly apiUrl = 'http://127.0.0.1:8000/v1';
 
@@ -285,7 +285,7 @@ export class LabmindApiService {
       return {
         code: 'connection_refused',
         message:
-          "Impossible de joindre le serveur backend sur http://127.0.0.1:8000. Vérifiez qu'uvicorn est démarré."
+          "Impossible de communiquer avec le backend sur http://127.0.0.1:8000. Vérifiez qu'uvicorn est démarré et ouvrez l'application depuis le frontend local (http://localhost:4200 ou http://localhost:5173)."
       };
     }
     return {

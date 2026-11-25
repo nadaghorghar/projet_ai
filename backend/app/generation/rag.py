@@ -194,42 +194,43 @@ _ALLOWED_IMAGE_KEYS = {
     "spinach",
     "lentils_chickpeas",
     "fish",
+    "meat_poultry",
     "fruits",
     "whole_grains",
     "vegetables",
+    "dairy_yogurt",
+    "eggs_protein",
+    "avocado_olive_oil",
+    "dark_chocolate",
+    "hydration_water",
     "neutral",
 }
 
 _FOOD_STEM_MAP: tuple[tuple[str, tuple[str, ...]], ...] = (
-    ("walnuts", ("cerneau", "noix de grenoble", "noix")),
-    ("almonds_walnuts", ("amand", "noisett", "oleagineu", "pistach")),
-    ("pumpkin_seeds", ("courge", "graine", "sesame", "tournesol", "lin")),
-    ("spinach", ("epinard", "bette", "feuille verte")),
-    ("lentils_chickpeas", ("lentill", "chiche", "haricot", "legumineus", "pois", "feve")),
+    ("meat_poultry", ("viand", "abat", "boudin", "=foie", "boeuf", "volaille", "poulet", "dinde", "fer heminique")),
     ("fish", ("poisson", "saumon", "sardine", "maquereau", "hareng", "truite", "thon")),
+    ("lentils_chickpeas", ("lentill", "pois chiche", "petits pois", "=pois", "haricot sec", "legumineus", "feve")),
+    ("walnuts", ("cerneau", "noix de grenoble", "=noix")),
+    ("almonds_walnuts", ("amand", "noisett", "oleagineu", "pistach")),
+    ("pumpkin_seeds", ("courge", "graine", "sesame", "tournesol", "=lin")),
+    ("spinach", ("epinard", "bette", "feuille verte", "feuilles vertes", "legumes verts")),
     ("fruits", ("fruit", "orange", "agrume", "pomme", "kiwi", "baie", "fraise", "banane", "citron")),
-    ("whole_grains", ("cereal", "complet", "avoine", "quinoa", "riz", "pain", "seigle", "ble")),
+    ("whole_grains", ("cereal", "complet", "avoine", "quinoa", "=riz", "=pain", "seigle", "=ble")),
     ("vegetables", ("legume", "brocoli", "carotte", "poivron", "courgette", "tomate")),
-)
-
-_NON_MAPPED_PRIMARY_FOOD_STEMS = (
-    "fer heminique",
-    "viande",
-    "abat",
-    "boudin",
-    "foie",
-    "oeuf",
-    "fromage",
-    "yaourt",
-    "lait",
-    "eau",
+    ("dairy_yogurt", ("produit laitier", "laitier", "yaourt", "fromage", "kefir", "=lait")),
+    ("eggs_protein", ("oeuf", "proteine")),
+    ("avocado_olive_oil", ("avocat", "colza", "=olive")),
+    ("dark_chocolate", ("chocolat", "cacao")),
+    ("hydration_water", ("=eau", "hydrat", "infusion", "tisane")),
 )
 
 
-def _matches_stem_word(norm_text: str, stem: str) -> bool:
-    if " " in stem:
-        return stem in norm_text
-    return bool(re.search(rf"\b{re.escape(stem)}\w*", norm_text))
+def _find_stem_position(norm_text: str, raw_stem: str) -> int:
+    exact = raw_stem.startswith("=")
+    stem = raw_stem[1:] if exact else raw_stem
+    pattern = rf"\b{re.escape(stem)}\b" if exact else rf"\b{re.escape(stem)}\w*"
+    m = re.search(pattern, norm_text)
+    return m.start() if m else -1
 
 
 def _resolve_food_image_key(
@@ -239,36 +240,30 @@ def _resolve_food_image_key(
     used_keys: set[str],
 ) -> str:
     """Associe chaque aliment à une image distincte correspondant réellement à son nom."""
-    norm_title = _strip_accents(title)
-    norm_sub = _strip_accents(subtitle)
+    norm_title = _strip_accents(title).replace("'", " ").replace("’", " ")
+    norm_sub = _strip_accents(subtitle).replace("'", " ").replace("’", " ")
 
-    if any(_matches_stem_word(norm_title, stem) for stem in _NON_MAPPED_PRIMARY_FOOD_STEMS):
-        if not any(
-            _matches_stem_word(norm_title, fstem)
-            for _, fstems in _FOOD_STEM_MAP
-            for fstem in fstems
-        ):
-            return "neutral"
-
-    candidates: list[str] = []
-    for key, stems in _FOOD_STEM_MAP:
-        if any(_matches_stem_word(norm_title, stem) for stem in stems):
-            candidates.append(key)
-
-    if not candidates:
+    for text in (norm_title, norm_sub):
+        if not text:
+            continue
+        ranked: list[tuple[int, str]] = []
         for key, stems in _FOOD_STEM_MAP:
-            if any(_matches_stem_word(norm_sub, stem) for stem in stems):
-                candidates.append(key)
+            if key in used_keys:
+                continue
+            for stem in stems:
+                pos = _find_stem_position(text, stem)
+                if pos != -1:
+                    ranked.append((pos, key))
+        if ranked:
+            ranked.sort(key=lambda item: item[0])
+            chosen = ranked[0][1]
+            used_keys.add(chosen)
+            return chosen
 
     cleaned_raw = raw_key.strip()
-    if cleaned_raw in _ALLOWED_IMAGE_KEYS and cleaned_raw not in ("balanced", "neutral"):
-        if not candidates:
-            candidates.append(cleaned_raw)
-
-    for candidate in candidates:
-        if candidate not in used_keys:
-            used_keys.add(candidate)
-            return candidate
+    if cleaned_raw in _ALLOWED_IMAGE_KEYS and cleaned_raw not in ("balanced", "neutral") and cleaned_raw not in used_keys:
+        used_keys.add(cleaned_raw)
+        return cleaned_raw
 
     return "neutral"
 
